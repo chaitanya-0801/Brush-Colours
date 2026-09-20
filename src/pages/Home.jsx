@@ -4,11 +4,13 @@ import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import ExperienceCard from '../components/ExperienceCard'
-import { activities, categoryMeta } from '../data'
+import { categoryMeta } from '../data'
+import { useActivities } from '../context/ActivityContext'
 
 const categories = ['birthday', 'wedding', 'workshop']
 
 export default function Home() {
+  const { activities } = useActivities()
   const videoRef = useRef(null)
   const [playing, setPlaying] = useState(true)
 
@@ -42,7 +44,7 @@ export default function Home() {
           </video>
           <div className="hero__veil" />
           <div className="shell hero__content">
-            <span className="hero__eyebrow">DELHI NCR · EXPERIENCES AT YOUR VENUE</span>
+            <span className="hero__eyebrow">6 CITIES · EXPERIENCES AT YOUR VENUE</span>
             <h1>Make every gathering <em>unforgettable.</em></h1>
             <p>Curated activities for birthdays, weddings and creative weekends.</p>
             <div className="hero__actions">
@@ -126,7 +128,7 @@ export default function Home() {
               </div>
             </div>
             <div className="story-section__copy">
-              <span className="kicker kicker--light">Why Moments & Makers</span>
+              <span className="kicker kicker--light">Why Brush&amp;Colours</span>
               <h2>More than an activity.<br /><em>It’s the feeling after.</em></h2>
               <p>We bring together thoughtful hosts, skilled makers and beautifully run experiences. You arrive, settle in and enjoy the people you came with—we handle the rest.</p>
               <ul>
@@ -168,7 +170,7 @@ export default function Home() {
             <span className="kicker kicker--light">For teams, families and big plans</span>
             <h2>Have something<br /><em>more personal in mind?</em></h2>
             <p>Tell us the occasion, guest count and mood. We’ll shape an experience around your people.</p>
-            <a className="button button--ivory button--large" href="mailto:hello@momentsandmakers.in">Plan a custom event <ArrowRight /></a>
+            <a className="button button--ivory button--large" href="https://wa.me/916378788998?text=Hello%20Brush%26Colours%2C%20I%20would%20like%20to%20plan%20a%20custom%20event." target="_blank" rel="noreferrer">Plan a custom event <ArrowRight /></a>
           </div>
         </section>
       </main>

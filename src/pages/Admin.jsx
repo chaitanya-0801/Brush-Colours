@@ -1,193 +1,154 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Bell,
-  CalendarDays,
-  Check,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  CircleDollarSign,
-  Clock3,
-  IndianRupee,
-  LayoutDashboard,
-  Menu,
-  MoreVertical,
-  PackageOpen,
-  Plus,
-  Search,
-  UsersRound,
-  WalletCards,
-  X,
+  Bell, CalendarDays, Check, ChevronDown, CircleDollarSign, Clock3, IndianRupee,
+  LayoutDashboard, LogOut, Menu, PackageOpen, Search, ShieldCheck, UsersRound,
+  WalletCards, X,
 } from 'lucide-react'
-import { activities, bookings, formatPrice } from '../data'
+import { useNavigate } from 'react-router-dom'
+import { api } from '../api'
+import { useActivities } from '../context/ActivityContext'
+import { useAuth } from '../context/AuthContext'
+import { formatPrice } from '../data'
 
 const menuItems = [
   ['Overview', LayoutDashboard],
   ['Activities & Pricing', PackageOpen],
   ['Bookings', UsersRound],
-  ['Calendar', CalendarDays],
-  ['Payments', WalletCards],
+  ['Monthly Revenue', WalletCards],
 ]
 
-const calendarDays = [
-  { day: 26, muted: true }, { day: 27, muted: true }, { day: 28, muted: true }, { day: 29, muted: true }, { day: 30, muted: true }, { day: 31, muted: true }, { day: 1 },
-  { day: 2 }, { day: 3, state: 'confirmed' }, { day: 4, state: 'pending' }, { day: 5 }, { day: 6 }, { day: 7, state: 'pending' }, { day: 8 },
-  { day: 9 }, { day: 10 }, { day: 11 }, { day: 12, state: 'confirmed' }, { day: 13, state: 'confirmed' }, { day: 14, selected: true }, { day: 15 },
-  { day: 16 }, { day: 17, state: 'pending' }, { day: 18, state: 'confirmed' }, { day: 19 }, { day: 20 }, { day: 21 }, { day: 22 },
-  { day: 23 }, { day: 24, state: 'pending' }, { day: 25 }, { day: 26 }, { day: 27 }, { day: 28 }, { day: 29 },
-  { day: 30 }, { day: 1, muted: true }, { day: 2, muted: true }, { day: 3, muted: true }, { day: 4, muted: true }, { day: 5, muted: true }, { day: 6, muted: true },
-]
+const statusLabel = (status) => ({ quote_requested: 'Quote requested', payment_pending: 'Payment pending', confirmed: 'Confirmed', cancelled: 'Cancelled' }[status] || status)
 
 export default function Admin() {
   const [activeMenu, setActiveMenu] = useState('Overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [dashboard, setDashboard] = useState(null)
+  const [allBookings, setAllBookings] = useState([])
+  const [prices, setPrices] = useState({})
+  const [dirty, setDirty] = useState(new Set())
   const [saved, setSaved] = useState(false)
-  const [prices, setPrices] = useState(() => {
-    const stored = localStorage.getItem('moments-admin-prices')
-    return stored ? JSON.parse(stored) : Object.fromEntries(activities.map((item) => [item.id, item.price]))
-  })
+  const [error, setError] = useState('')
+  const [securityOpen, setSecurityOpen] = useState(false)
+  const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' })
+  const { activities, refreshActivities } = useActivities()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
-  const visibleActivities = useMemo(
-    () => activities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())).slice(0, 6),
-    [query],
-  )
+  const loadDashboard = async () => {
+    try {
+      const [dashboardResult, bookingResult] = await Promise.all([api.adminDashboard(), api.adminBookings()])
+      setDashboard(dashboardResult)
+      setAllBookings(bookingResult.bookings)
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
 
+  useEffect(() => { loadDashboard() }, [])
+  useEffect(() => { setPrices(Object.fromEntries(activities.map((item) => [item.id, item.price]))) }, [activities])
   useEffect(() => {
     if (!saved) return undefined
     const timer = window.setTimeout(() => setSaved(false), 2400)
     return () => window.clearTimeout(timer)
   }, [saved])
 
-  const savePrices = () => {
-    localStorage.setItem('moments-admin-prices', JSON.stringify(prices))
-    setSaved(true)
+  const visibleActivities = useMemo(() => activities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())), [activities, query])
+  const visibleBookings = useMemo(() => allBookings.filter((booking) => `${booking.id} ${booking.activityTitle} ${booking.customerName} ${booking.customerEmail} ${booking.city}`.toLowerCase().includes(query.toLowerCase())), [allBookings, query])
+
+  const savePrices = async () => {
+    setError('')
+    try {
+      await Promise.all([...dirty].map((id) => api.updateActivity(id, prices[id])))
+      await refreshActivities()
+      setDirty(new Set())
+      setSaved(true)
+    } catch (requestError) {
+      setError(requestError.message)
+    }
   }
+
+  const changeStatus = async (id, status) => {
+    try {
+      await api.updateBookingStatus(id, status)
+      await loadDashboard()
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
+  const signOut = async () => {
+    await logout()
+    navigate('/login')
+  }
+
+  const changePassword = async (event) => {
+    event.preventDefault()
+    setError('')
+    try {
+      await api.changePassword(passwords)
+      await logout().catch(() => {})
+      navigate('/login', { replace: true })
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
+  const metrics = dashboard?.metrics || { todayBookings: 0, thisMonthRevenue: 0, pendingPayments: 0, pendingValue: 0, totalRevenue: 0, totalBookings: 0 }
+  const maxRevenue = Math.max(1, ...(dashboard?.monthlyRevenue || []).map((item) => item.revenue))
 
   return (
     <div className="admin-shell">
       <aside className={`admin-sidebar ${sidebarOpen ? 'is-open' : ''}`}>
         <button className="admin-sidebar__close" onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><X /></button>
-        <div className="admin-brand">
-          <strong>MOMENTS <i>&</i><br />MAKERS</strong>
-          <span>ADMIN</span>
-        </div>
+        <div className="admin-brand"><strong>BRUSH <i>&</i><br />COLOURS</strong><span>ADMIN</span></div>
         <small>PEOPLE · PLACES ·<br />CREATIVE EXPERIENCES</small>
-        <nav>
-          {menuItems.map(([label, Icon]) => (
-            <button
-              key={label}
-              className={activeMenu === label ? 'is-active' : ''}
-              onClick={() => { setActiveMenu(label); setSidebarOpen(false) }}
-            >
-              <Icon /> {label}
-            </button>
-          ))}
-        </nav>
+        <nav>{menuItems.map(([label, Icon]) => <button key={label} className={activeMenu === label ? 'is-active' : ''} onClick={() => { setActiveMenu(label); setSidebarOpen(false); document.getElementById(label.toLowerCase().replaceAll(' ', '-'))?.scrollIntoView() }}><Icon /> {label}</button>)}</nav>
         <div className="admin-sidebar__quote">MAKE<br />SOMETHING<br /><em>BEAUTIFUL</em><br />TODAY.</div>
-        <div className="admin-sidebar__footer">Create · Host · Grow</div>
+        <button className="admin-signout" onClick={signOut}><LogOut /> Sign out</button>
       </aside>
 
       <main className="admin-main">
         <header className="admin-topbar">
           <button className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu /></button>
-          <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search bookings, customers, or activities..." /></label>
+          <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search bookings, customers, cities or activities..." /></label>
           <button className="admin-bell" aria-label="Notifications"><Bell /><span /></button>
-          <button className="admin-profile">
-            <span className="admin-avatar">G</span>
-            <span><strong>Garima</strong><small>Owner</small></span>
-            <ChevronDown />
+          <button className="admin-profile" onClick={() => setSecurityOpen(true)} title="Account security">
+            <span className="admin-avatar">G</span><span><strong>{user.name}</strong><small>Owner</small></span><ChevronDown />
           </button>
         </header>
 
-        <div className="admin-content">
-          <div className="admin-welcome">
-            <div>
-              <span className="admin-mobile-section">{activeMenu}</span>
-              <h1>Good morning, Garima</h1>
-              <p>Here’s what’s happening with your experiences today.</p>
-            </div>
-            <button className="button button--coral"><Plus /> Add new activity</button>
-          </div>
+        <div className="admin-content" id="overview">
+          <div className="admin-welcome"><div><span className="admin-mobile-section">{activeMenu}</span><h1>Good morning, {user.name.split(' ')[0]}</h1><p>Live bookings, payments and revenue from your database.</p></div><button className="button button--outline" onClick={() => setSecurityOpen(true)}><ShieldCheck /> Security</button></div>
+          {error && <div className="form-error admin-error">{error}</div>}
 
           <section className="admin-metrics">
-            <article>
-              <i className="metric-icon metric-icon--coral"><CalendarDays /></i>
-              <div><span>Today’s bookings</span><strong>6</strong><small>2 more than yesterday · <b>+33%</b></small></div>
-            </article>
-            <article>
-              <i className="metric-icon metric-icon--green"><IndianRupee /></i>
-              <div><span>This month</span><strong>₹2,84,500</strong><small>Up from last month · <b>+18%</b></small></div>
-            </article>
-            <article>
-              <i className="metric-icon metric-icon--gold"><Clock3 /></i>
-              <div><span>Pending payments</span><strong>3</strong><small>Total value · <b>₹12,497</b></small></div>
-            </article>
+            <article><i className="metric-icon metric-icon--coral"><CalendarDays /></i><div><span>Today’s bookings</span><strong>{metrics.todayBookings}</strong><small>{metrics.totalBookings} bookings in total</small></div></article>
+            <article><i className="metric-icon metric-icon--green"><IndianRupee /></i><div><span>This month</span><strong>{formatPrice(metrics.thisMonthRevenue)}</strong><small>Total paid revenue · <b>{formatPrice(metrics.totalRevenue)}</b></small></div></article>
+            <article><i className="metric-icon metric-icon--gold"><Clock3 /></i><div><span>Pending payments</span><strong>{metrics.pendingPayments}</strong><small>Total value · <b>{formatPrice(metrics.pendingValue)}</b></small></div></article>
           </section>
 
-          <div className="admin-dashboard-grid">
-            <section className="admin-panel pricing-panel">
-              <div className="admin-panel__heading">
-                <div><h2>Activities & Pricing</h2><p>Manage offerings and prices. Changes apply only to new bookings.</p></div>
-                <button><Plus /> Add activity</button>
-              </div>
+          <section className="admin-panel revenue-panel" id="monthly-revenue">
+            <div className="admin-panel__heading"><div><h2>Monthly revenue</h2><p>Paid and verified bookings only. The current month updates after every successful payment.</p></div><CircleDollarSign /></div>
+            <div className="revenue-chart">
+              {(dashboard?.monthlyRevenue || []).map((item) => <div className="revenue-bar" key={item.month} title={`${item.label}: ${formatPrice(item.revenue)} from ${item.bookings} bookings`}><strong>{item.revenue ? formatPrice(item.revenue) : '—'}</strong><i style={{ height: `${Math.max(item.revenue ? 12 : 2, (item.revenue / maxRevenue) * 100)}%` }} /><span>{item.label}</span><small>{item.bookings} {item.bookings === 1 ? 'booking' : 'bookings'}</small></div>)}
+            </div>
+          </section>
 
-              <div className="pricing-table-wrap">
-                <table className="pricing-table">
-                  <thead><tr><th>Activity</th><th>Category</th><th>Current price</th><th>Status</th><th>Action</th></tr></thead>
-                  <tbody>
-                    {visibleActivities.map((activity) => (
-                      <tr key={activity.id}>
-                        <td><img src={activity.image} alt="" /><strong>{activity.title}</strong></td>
-                        <td className="capitalize">{activity.category}</td>
-                        <td><div className="price-input"><IndianRupee /><input aria-label={`${activity.title} price`} type="number" value={prices[activity.id]} onChange={(event) => setPrices({ ...prices, [activity.id]: Number(event.target.value) })} /></div></td>
-                        <td><span className="status-pill status-pill--confirmed"><i /> Active</span></td>
-                        <td><button className="row-action">Edit details</button><button className="icon-only" aria-label={`More options for ${activity.title}`}><MoreVertical /></button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          <section className="admin-panel pricing-panel" id="activities-&-pricing">
+            <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Changes are stored in the database and apply only to new bookings.</p></div></div>
+            <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Current price</th><th>Status</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><img src={activity.image} alt="" /><strong>{activity.title}</strong></td><td className="capitalize">{activity.category}</td><td><div className="price-input"><IndianRupee /><input aria-label={`${activity.title} price`} type="number" min="0" placeholder="Request quote" value={prices[activity.id] ?? ''} onChange={(event) => { setPrices({ ...prices, [activity.id]: event.target.value === '' ? null : Number(event.target.value) }); setDirty(new Set(dirty).add(activity.id)) }} /></div></td><td><span className="status-pill status-pill--confirmed"><i /> Active</span></td></tr>)}</tbody></table></div>
+            <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} of {activities.length} activities</span><button className="button button--coral" disabled={!dirty.size} onClick={savePrices}>{saved ? <><Check /> Saved</> : `Save ${dirty.size || ''} changes`}</button></div>
+          </section>
 
-              <div className="pricing-panel__footer">
-                <span>Showing {visibleActivities.length} of {activities.length} activities</span>
-                <div><button className="button button--outline">Cancel</button><button className="button button--coral" onClick={savePrices}>{saved ? <><Check /> Saved</> : 'Save changes'}</button></div>
-              </div>
-            </section>
-
-            <aside className="admin-side-column">
-              <section className="admin-panel calendar-panel">
-                <div className="calendar-panel__head"><div><h2>Upcoming bookings</h2><span>June 2026</span></div><div><button><ChevronLeft /></button><button><ChevronRight /></button></div></div>
-                <div className="calendar-week"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
-                <div className="calendar-days">
-                  {calendarDays.map((item, index) => (
-                    <button key={`${item.day}-${index}`} className={`${item.muted ? 'is-muted' : ''} ${item.selected ? 'is-selected' : ''}`}>
-                      {item.day}{item.state && <i className={`day-state day-state--${item.state}`} />}
-                    </button>
-                  ))}
-                </div>
-                <div className="calendar-legend"><span><i className="legend-confirmed" />Confirmed</span><span><i className="legend-pending" />Payment pending</span><span><i className="legend-blocked" />Blocked</span></div>
-              </section>
-
-              <section className="admin-panel next-bookings">
-                <div className="next-bookings__head"><h2>Next bookings</h2><button>View all <ChevronRight /></button></div>
-                {bookings.map((booking) => (
-                  <article key={booking.id}>
-                    <div className="booking-date"><strong>{booking.day}</strong><span>{booking.month}</span></div>
-                    <div className="booking-copy"><strong>{booking.activity}</strong><span>{booking.time}</span><span>{booking.guests} participants</span></div>
-                    <span className={`status-pill status-pill--${booking.status.toLowerCase().replace(' ', '-')}`}><i />{booking.status}</span>
-                  </article>
-                ))}
-              </section>
-
-              <section className="admin-panel revenue-note">
-                <CircleDollarSign />
-                <div><strong>Payments are healthy</strong><span>97.6% successful this month</span></div>
-              </section>
-            </aside>
-          </div>
+          <section className="admin-panel admin-bookings" id="bookings">
+            <div className="admin-panel__heading"><div><h2>All bookings</h2><p>Customer, city, payment and event details update from real booking records.</p></div></div>
+            <div className="pricing-table-wrap"><table className="pricing-table bookings-table"><thead><tr><th>Booking</th><th>Customer</th><th>Event</th><th>City</th><th>Amount</th><th>Status</th></tr></thead><tbody>{visibleBookings.map((booking) => <tr key={booking.id}><td><strong>{booking.id}</strong><small>{booking.activityTitle}</small></td><td><strong>{booking.customerName}</strong><small>{booking.customerEmail}</small></td><td><strong>{booking.eventDate}</strong><small>{booking.eventTime} · {booking.guests} guests</small></td><td>{booking.city}</td><td>{booking.amount == null ? 'Quote' : formatPrice(booking.amount)}<small>{booking.paymentStatus}</small></td><td><select className={`booking-status-select status-${booking.status}`} value={booking.status} onChange={(event) => changeStatus(booking.id, event.target.value)}><option value="quote_requested">Quote requested</option><option value="payment_pending">Payment pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select></td></tr>)}</tbody></table>{!visibleBookings.length && <div className="admin-empty">No bookings match this search yet.</div>}</div>
+          </section>
         </div>
       </main>
+
+      {securityOpen && <div className="modal-backdrop" onMouseDown={() => setSecurityOpen(false)}><form className="checkout-modal security-modal" onSubmit={changePassword} onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSecurityOpen(false)}><X /></button><span className="kicker">Admin security</span><h2>Change your password</h2><p>You will be signed out after the password is changed.</p>{error && <div className="form-error">{error}</div>}<div className="form-grid"><label className="span-two">Current password<input required type="password" value={passwords.currentPassword} onChange={(event) => setPasswords({ ...passwords, currentPassword: event.target.value })} /></label><label className="span-two">New password<input required minLength="8" type="password" value={passwords.newPassword} onChange={(event) => setPasswords({ ...passwords, newPassword: event.target.value })} /></label></div><button className="button button--coral button--wide">Change password</button></form></div>}
     </div>
   )
 }

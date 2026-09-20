@@ -1,5 +1,6 @@
-import { ArrowUpRight, Camera, MapPin, MessageCircle } from 'lucide-react'
+import { ArrowUpRight, Camera, MapPin, MessageCircle, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { serviceCities } from '../data'
 
 export default function Footer() {
   return (
@@ -7,7 +8,7 @@ export default function Footer() {
       <div className="shell footer__grid">
         <div>
           <div className="brand brand--light footer__brand">
-            <span>MOMENTS</span><i>&</i><span>MAKERS</span>
+            <span>BRUSH</span><i>&</i><span>COLOURS</span>
           </div>
           <p className="footer__statement">Create together.<br />Celebrate beautifully.</p>
         </div>
@@ -20,10 +21,11 @@ export default function Footer() {
         </div>
 
         <div className="footer__links">
-          <span>Visit</span>
-          <a href="#contact"><MapPin size={15} /> Delhi NCR</a>
-          <a href="#contact"><MessageCircle size={15} /> WhatsApp us</a>
-          <a href="#contact"><Camera size={15} /> Instagram</a>
+          <span>Contact</span>
+          <span className="footer__cities"><MapPin size={15} /> {serviceCities.join(' · ')}</span>
+          <a href="tel:+916378788998"><Phone size={15} /> +91 63787 88998</a>
+          <a href="https://wa.me/916378788998" target="_blank" rel="noreferrer"><MessageCircle size={15} /> WhatsApp us</a>
+          <a href="https://www.instagram.com/brush__colours/" target="_blank" rel="noreferrer"><Camera size={15} /> @brush__colours</a>
         </div>
 
         <div className="footer__newsletter">
@@ -35,7 +37,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="shell footer__bottom">
-        <span>© 2026 Moments & Makers</span>
+        <span>© 2026 Brush&amp;Colours</span>
         <div><a href="#terms">Terms</a><a href="#privacy">Privacy</a><a href="#refunds">Refunds</a></div>
       </div>
     </footer>

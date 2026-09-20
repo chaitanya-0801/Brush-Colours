@@ -1,22 +1,29 @@
-# Moments & Makers frontend
+# Brush&Colours frontend
 
-A standalone React + Vite frontend for Garima's birthday, wedding and workshop experience platform. This project does not use Next.js.
+A React + Vite customer and admin application for Brush&Colours' birthday, wedding and workshop experience platform. This project does not use Next.js and connects to the Express API in the adjacent `Backend` folder.
 
 ## Included screens
 
 - Cinematic responsive home page with a local hero video
-- Birthday, wedding and workshop catalogue with search, category filtering and price sorting
+- Birthday, wedding and workshop catalogue with search, city selection, category filtering and price sorting
 - Experience detail pages
-- Tomorrow-onward, activity-specific booking date validation
-- Guest and time selection
-- Safe demo checkout and confirmation state
-- Responsive admin dashboard for Garima
-- Editable pricing saved in the browser for demonstration
-- Booking calendar, payment states and upcoming-booking cards
+- Customer sign-up, sign-in, sign-out and private booking history
+- City, guest, date, time, contact and venue selection
+- Backend-enforced booking lead times with same-day booking blocked
+- Database-backed bookings and a clearly labelled local test-payment flow
+- Role-protected responsive admin dashboard for Garima
+- Database-backed activity pricing, bookings, payment states and monthly revenue
 
 ## Start locally
 
+Start the API first from `../Backend`, then start this frontend:
+
 ```bash
+cd ../Backend
+npm install
+npm run dev
+
+cd ../Frontend
 npm install
 npm run dev
 ```
@@ -38,27 +45,19 @@ npm run preview
 - `/experiences?category=wedding`
 - `/experiences?category=workshop`
 - `/experience/pottery-party` — representative detail and booking flow
-- `/admin` — Garima's admin dashboard
+- `/login` and `/signup` — customer and administrator authentication
+- `/bookings` — signed-in customer's bookings
+- `/admin` — role-protected Garima admin dashboard
 
 ## Content and branding
 
-Activity copy, prices and image URLs live in `src/data.js`. Global colours and typography live at the top of `src/styles.css`.
+Activity copy and image URLs live in `src/data.js`; live prices come from the backend database. Global colours and typography live at the top of `src/styles.css`.
 
 The current name, statistics, activities, contact address and testimonials are polished placeholders. Replace them with verified business information before launch.
 
-## Backend integrations still required for production
+## Before production
 
-This repository is the frontend requested for the project. Before accepting real bookings, connect it to:
-
-- a database and availability service;
-- secure admin authentication;
-- a server-side booking API;
-- a payment gateway such as Razorpay;
-- verified payment webhooks;
-- email or WhatsApp confirmation services;
-- real cancellation and refund policies.
-
-Never trust prices from the browser. The final server must calculate totals, enforce booking lead times and lock limited-capacity slots.
+The included backend already owns prices, authentication, bookings and revenue calculations. Local payments are intentionally marked as tests and charge no money. Before launch, complete payment-provider onboarding, add the provider's customer checkout with explicit data-sharing consent, configure verified webhooks, enable HTTPS, replace all development secrets and publish cancellation/refund policies.
 
 ## Media
 

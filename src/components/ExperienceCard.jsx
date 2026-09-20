@@ -34,7 +34,11 @@ export default function ExperienceCard({ activity, compact = false }) {
           <span><MapPin size={15} />{activity.location}</span>
         </div>
         <div className="experience-card__footer">
-          <span><Star size={15} fill="currentColor" /> {activity.rating} <small>({activity.reviews})</small></span>
+          {activity.rating ? (
+            <span><Star size={15} fill="currentColor" /> {activity.rating} <small>({activity.reviews})</small></span>
+          ) : (
+            <span className="new-service">New service</span>
+          )}
           <Link to={`/experience/${activity.id}`}>View details</Link>
         </div>
       </div>

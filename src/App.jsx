@@ -3,7 +3,10 @@ import Home from './pages/Home'
 import Experiences from './pages/Experiences'
 import ExperienceDetail from './pages/ExperienceDetail'
 import Admin from './pages/Admin'
+import Auth from './pages/Auth'
+import MyBookings from './pages/MyBookings'
 import ScrollToTop from './components/ScrollToTop'
+import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
   return (
@@ -13,7 +16,10 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/experiences" element={<Experiences />} />
         <Route path="/experience/:id" element={<ExperienceDetail />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/signup" element={<Auth />} />
+        <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute role="admin"><Admin /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

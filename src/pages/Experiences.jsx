@@ -4,7 +4,8 @@ import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import ExperienceCard from '../components/ExperienceCard'
-import { activities } from '../data'
+import { serviceCities } from '../data'
+import { useActivities } from '../context/ActivityContext'
 
 const tabs = [
   { value: 'all', label: 'All experiences' },
@@ -14,10 +15,12 @@ const tabs = [
 ]
 
 export default function Experiences() {
+  const { activities } = useActivities()
   const [searchParams, setSearchParams] = useSearchParams()
   const category = searchParams.get('category') || 'all'
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('popular')
+  const [city, setCity] = useState('All cities')
 
   const filtered = useMemo(() => {
     const matching = activities.filter((activity) => {
@@ -26,8 +29,8 @@ export default function Experiences() {
       return categoryMatches && searchMatches
     })
     return [...matching].sort((a, b) => {
-      if (sort === 'low') return a.price - b.price
-      if (sort === 'high') return b.price - a.price
+      if (sort === 'low') return (a.price ?? Number.POSITIVE_INFINITY) - (b.price ?? Number.POSITIVE_INFINITY)
+      if (sort === 'high') return (b.price ?? -1) - (a.price ?? -1)
       return b.rating - a.rating || b.reviews - a.reviews
     })
   }, [category, search, sort])
@@ -71,7 +74,7 @@ export default function Experiences() {
                 <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search activities" />
               </label>
               <div className="filter-chips">
-                <button>Delhi NCR <ChevronDown /></button>
+                <label className="filter-city"><select value={city} onChange={(event) => setCity(event.target.value)}><option>All cities</option>{serviceCities.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown /></label>
                 <button>Date <ChevronDown /></button>
                 <button>Guests <ChevronDown /></button>
                 <button className="filter-chip--mobile"><SlidersHorizontal /> Filters</button>
@@ -86,7 +89,7 @@ export default function Experiences() {
               </label>
             </div>
 
-            <div className="catalogue-count"><strong>{filtered.length}</strong> experiences</div>
+            <div className="catalogue-count"><strong>{filtered.length}</strong> experiences {city !== 'All cities' && <span>available in {city}</span>}</div>
 
             {filtered.length ? (
               <div className="experience-grid experience-grid--three catalogue-grid">

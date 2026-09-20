@@ -1,3 +1,6 @@
+export const serviceCities = ['Delhi', 'Kota', 'Bombay', 'Pune', 'Jaipur', 'Gujarat']
+export const serviceArea = '6 service cities'
+
 export const categoryMeta = {
   birthday: {
     label: 'Birthday',
@@ -34,7 +37,7 @@ export const activities = [
     priceUnit: 'per group',
     duration: '2 hrs',
     guests: '2–10 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.9,
     reviews: 320,
     badge: 'Most loved',
@@ -54,7 +57,7 @@ export const activities = [
     priceUnit: 'per event',
     duration: '90 mins',
     guests: '15–30 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.8,
     reviews: 210,
     badge: 'Popular',
@@ -74,7 +77,7 @@ export const activities = [
     priceUnit: 'starting price',
     duration: '4 hrs',
     guests: 'Any event size',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 5.0,
     reviews: 118,
     badge: 'Signature',
@@ -82,6 +85,146 @@ export const activities = [
     image:
       'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1200&q=85',
     includes: ['Pre-event consultation', 'Live event painting', 'Professional art materials', 'Finished artwork'],
+  },
+  {
+    id: 'perfume-making-stall',
+    category: 'wedding',
+    title: 'Perfume Making Stall',
+    short: 'Guests create a customised perfume by choosing their favourite fragrances.',
+    description:
+      'A fun and luxurious wedding experience where guests explore fragrance notes, blend a personalised perfume and take their creation home as a memorable favour.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 80 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Wedding favourite',
+    minLeadDays: 7,
+    image:
+      'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Fragrance selection', 'Mixing station and bottles', 'Event facilitator', 'Personalised take-home perfume'],
+  },
+  {
+    id: 'face-art-stall',
+    category: 'wedding',
+    title: 'Face Art Stall',
+    short: 'Quick and beautiful face designs using vibrant paints, shimmer and glitter.',
+    description:
+      'Add colour and sparkle to every celebration with elegant face art for guests of all ages. Designs can be coordinated with the wedding theme and guest preferences.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 60 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Colourful',
+    minLeadDays: 5,
+    image:
+      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Professional face artist', 'Skin-friendly paints', 'Glitter and shimmer options', 'Complete stall setup'],
+  },
+  {
+    id: 'lipstick-making-stall',
+    category: 'wedding',
+    title: 'Lipstick Making Stall',
+    short: 'Guests design their own lipstick shades using safe, skin-friendly ingredients.',
+    description:
+      'A creative and trendy wedding activity where guests mix pigments, choose their shade and take home a lipstick made especially for them.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 50 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Trending',
+    minLeadDays: 7,
+    image:
+      'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Skin-friendly ingredients', 'Shade mixing station', 'Lipstick containers', 'Guided making experience'],
+  },
+  {
+    id: 'glitter-art-stall',
+    category: 'wedding',
+    title: 'Glitter Art Stall',
+    short: 'Sparkling glitter tattoos and decorative art for hands and face.',
+    description:
+      'A lively, photo-friendly stall offering beautiful temporary glitter designs. It is a fun addition for children and adults at wedding celebrations.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 70 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Guest favourite',
+    minLeadDays: 5,
+    image:
+      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Professional glitter artist', 'Skin-safe glitter', 'Design catalogue', 'Complete stall setup'],
+  },
+  {
+    id: 'lip-balm-making-stall',
+    category: 'wedding',
+    title: 'Lip Balm Making Stall',
+    short: 'A soothing DIY station where guests make natural lip balms.',
+    description:
+      'Simple, fun and useful, this guided stall lets guests blend their own natural lip balm and package it as a perfect take-home gift.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 60 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Take-home gift',
+    minLeadDays: 7,
+    image:
+      'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Natural ingredients', 'Mixing tools', 'Lip balm containers', 'Guided DIY station'],
+  },
+  {
+    id: 'resin-keychain-stall',
+    category: 'wedding',
+    title: 'Resin Keychain Stall',
+    short: 'Guests design resin keychains using colours, charms, glitter and more.',
+    description:
+      'A personalised keepsake experience where guests create their own resin keychain—a small memory they can carry long after the wedding.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 60 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Personalised',
+    minLeadDays: 7,
+    image:
+      'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Resin and moulds', 'Colours, glitter and charms', 'Keychain fittings', 'Event facilitator'],
+  },
+  {
+    id: 'block-making-stall',
+    category: 'wedding',
+    title: 'Block Making Stall',
+    short: 'A hands-on printing station where guests create patterns with decorative blocks.',
+    description:
+      'Guests choose motifs, colours and layouts before printing a personalised design. The activity is relaxed, creative and makes a distinctive wedding keepsake.',
+    price: null,
+    priceUnit: 'custom package',
+    duration: '3 hrs',
+    guests: 'Up to 60 guests',
+    location: serviceArea,
+    rating: null,
+    reviews: 0,
+    badge: 'Hands-on',
+    minLeadDays: 7,
+    image:
+      'https://images.unsplash.com/photo-1581783898377-1c85bf937427?auto=format&fit=crop&w=1200&q=85',
+    includes: ['Printing blocks', 'Fabric-safe colours', 'Practice material', 'Guided stall experience'],
   },
   {
     id: 'little-makers-studio',
@@ -94,7 +237,7 @@ export const activities = [
     priceUnit: 'per event',
     duration: '2 hrs',
     guests: '10–25 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.9,
     reviews: 144,
     badge: 'New',
@@ -114,7 +257,7 @@ export const activities = [
     priceUnit: 'per event',
     duration: '60 mins',
     guests: '50–250 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.8,
     reviews: 89,
     badge: 'Crowd favourite',
@@ -134,7 +277,7 @@ export const activities = [
     priceUnit: 'per group',
     duration: '2 hrs',
     guests: '2–8 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.8,
     reviews: 172,
     badge: 'Trending',
@@ -154,7 +297,7 @@ export const activities = [
     priceUnit: 'per event',
     duration: '2 hrs',
     guests: '20–50 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.7,
     reviews: 98,
     badge: 'High energy',
@@ -174,7 +317,7 @@ export const activities = [
     priceUnit: 'starting price',
     duration: '4 hrs',
     guests: 'Up to 80 portraits',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.9,
     reviews: 76,
     badge: 'Premium',
@@ -194,7 +337,7 @@ export const activities = [
     priceUnit: 'per group',
     duration: '2 hrs',
     guests: '2–10 guests',
-    location: 'Delhi NCR',
+    location: serviceArea,
     rating: 4.8,
     reviews: 132,
     badge: 'Beginner friendly',
@@ -212,9 +355,11 @@ export const bookings = [
   { id: 'MM-1054', day: 16, month: 'JUN', activity: 'Wedding Live Art', time: '4:00 PM – 8:00 PM', guests: 180, status: 'Blocked' },
 ]
 
-export const formatPrice = (price) =>
-  new Intl.NumberFormat('en-IN', {
+export const formatPrice = (price) => {
+  if (price == null) return 'Request quote'
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
     maximumFractionDigits: 0,
   }).format(price)
+}

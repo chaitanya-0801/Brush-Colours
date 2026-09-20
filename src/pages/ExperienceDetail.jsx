@@ -4,10 +4,12 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import BookingPanel from '../components/BookingPanel'
 import ExperienceCard from '../components/ExperienceCard'
-import { activities } from '../data'
+import { serviceCities } from '../data'
+import { useActivities } from '../context/ActivityContext'
 
 export default function ExperienceDetail() {
   const { id } = useParams()
+  const { activities } = useActivities()
   const activity = activities.find((item) => item.id === id)
 
   if (!activity) return null
@@ -28,12 +30,14 @@ export default function ExperienceDetail() {
             <div className="detail-heading">
               <span className="kicker">{activity.category} experience</span>
               <h1>{activity.title}</h1>
-              <div className="detail-rating"><Star fill="currentColor" /> {activity.rating} <span>({activity.reviews} reviews)</span></div>
+              <div className="detail-rating">
+                {activity.rating ? <><Star fill="currentColor" /> {activity.rating} <span>({activity.reviews} reviews)</span></> : <span>New wedding experience</span>}
+              </div>
             </div>
             <div className="detail-facts">
               <span><Clock3 /> <b>{activity.duration}</b><small>Experience length</small></span>
               <span><UsersRound /> <b>{activity.guests}</b><small>Group size</small></span>
-              <span><MapPin /> <b>{activity.location}</b><small>Service area</small></span>
+              <span><MapPin /> <b>{serviceCities.join(' · ')}</b><small>Service area</small></span>
               <span><ShieldCheck /> <b>Verified host</b><small>Curated by our team</small></span>
             </div>
             <article className="detail-copy">
