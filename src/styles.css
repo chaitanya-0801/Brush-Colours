@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,500&display=swap');
 
 :root {
+  color-scheme: only light;
   font-family: 'DM Sans', sans-serif;
   color: #171717;
   background: #f7f4ef;
@@ -353,50 +354,82 @@ h2 em {
 .mobile-menu {
   position: fixed;
   inset: 0;
-  z-index: 80;
-  padding: 96px 30px 36px;
+  z-index: 1000;
+  width: 100%;
+  min-height: 100vh;
+  height: 100dvh;
+  padding: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
   background: var(--ink);
   color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-12px);
-  transition: 200ms ease;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 200ms ease, visibility 200ms ease, transform 200ms ease;
 }
 
 .mobile-menu.is-open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
   transform: translateY(0);
 }
 
-.mobile-menu > a:not(.button) {
+.mobile-menu__content {
+  width: min(100%, 560px);
+  min-height: calc(100dvh - max(56px, env(safe-area-inset-top)) - max(56px, env(safe-area-inset-bottom)));
+  margin: 0 auto;
+  padding-top: clamp(74px, 12vh, 108px);
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu__links {
+  display: grid;
+  gap: clamp(2px, 1vh, 10px);
+}
+
+.mobile-menu__links > a {
+  display: block;
+  padding: 4px 0;
   font-family: 'Manrope', sans-serif;
-  font-size: clamp(2rem, 8vw, 3rem);
+  font-size: clamp(2rem, 10vw, 3.5rem);
+  line-height: 1.08;
   font-weight: 600;
   letter-spacing: -0.04em;
 }
 
-.mobile-menu .button {
+.mobile-menu__footer {
   margin-top: auto;
+  padding-top: 30px;
+  display: grid;
+  gap: 18px;
+}
+
+.mobile-menu__footer .button {
+  width: 100%;
 }
 
 .mobile-menu__close {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  z-index: 1;
+  top: max(24px, env(safe-area-inset-top));
+  right: max(24px, env(safe-area-inset-right));
   width: 46px;
   height: 46px;
   color: white;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
 }
 
 .mobile-menu__eyebrow {
-  margin-bottom: 10px;
+  margin-bottom: clamp(18px, 4vh, 32px);
   color: #aaa;
   font-size: 0.8rem;
   letter-spacing: 0.15em;
@@ -2236,7 +2269,7 @@ h2 em {
 .mobile-menu__logout {
   width: max-content;
   padding: 0;
-  color: #666;
+  color: #c5c5c5;
   background: transparent;
   border: 0;
   display: flex;
@@ -3012,12 +3045,20 @@ h2 em {
   }
 
   .catalogue-tabs {
-    width: calc(100% + 15px);
-    border-radius: 15px 0 0 15px;
+    width: 100%;
+    max-width: none;
+    padding: 7px;
+    border-radius: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    overflow: hidden;
   }
 
   .catalogue-tabs button {
-    min-width: 112px;
+    width: 100%;
+    min-width: 0;
+    padding-inline: 10px;
   }
 
   .filter-bar {

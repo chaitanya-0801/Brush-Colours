@@ -108,7 +108,7 @@ export default function BookingPanel({ activity }) {
                 {error && <div className="form-error">{error}</div>}
                 <div className="form-grid">
                   <label>Customer<input value={user.name} disabled /></label>
-                  <label>Phone number<input required type="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="+91 98765 43210" /></label>
+                  <label>Phone number<input required type="tel" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="Enter your WhatsApp number" /></label>
                   <label className="span-two">Email address<input value={user.email} disabled /></label>
                   <label className="span-two">Venue address<textarea required value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder={`Complete venue address in ${city}`} /></label>
                 </div>

@@ -36,7 +36,7 @@ export default function MyBookings() {
         <section className="shell bookings-list">
           {loading && <div className="account-empty">Loading your bookings…</div>}
           {error && <div className="form-error">{error}</div>}
-          {!loading && !bookings.length && <div className="account-empty"><CalendarDays /><h2>No bookings yet</h2><p>Find an experience and choose a city, date and time.</p><Link className="button button--coral" to="/experiences">Explore experiences</Link></div>}
+          {!loading && !error && !bookings.length && <div className="account-empty"><CalendarDays /><h2>No bookings yet</h2><p>Find an experience and choose a city, date and time.</p><Link className="button button--coral" to="/experiences">Explore experiences</Link></div>}
           {bookings.map((booking) => (
             <article className="booking-record" key={booking.id}>
               <div className="booking-record__date"><strong>{new Date(`${booking.eventDate}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit' })}</strong><span>{new Date(`${booking.eventDate}T00:00:00`).toLocaleDateString('en-IN', { month: 'short' })}</span></div>
