@@ -784,6 +784,18 @@ h2 em {
   font-size: 0.69rem;
 }
 
+.experience-card__price .experience-card__prebook {
+  width: max-content;
+  margin: 8px 0 0 auto;
+  padding: 5px 8px;
+  color: #9a4f38;
+  background: #fff0e9;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .experience-card__description {
   min-height: 50px;
   margin: 16px 0;
@@ -1499,6 +1511,20 @@ h2 em {
   font-size: 1.15rem;
 }
 
+.booking-panel__balance {
+  margin: -8px 0 17px;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.76rem;
+}
+
+.booking-panel__balance b {
+  color: var(--ink);
+  text-align: right;
+}
+
 .booking-panel__secure {
   margin: 14px 0 0;
   color: var(--muted);
@@ -1779,6 +1805,11 @@ h2 em {
 .booking-record__total { display: grid; justify-items: end; gap: 12px; }
 .booking-record__total strong { display: flex; align-items: center; gap: 4px; }
 .booking-record__total svg { width: 17px; }
+.booking-payment-breakdown { min-width: 220px; display: grid; gap: 5px; }
+.booking-payment-breakdown span { color: var(--muted); display: flex; justify-content: space-between; gap: 18px; font-size: .76rem; }
+.booking-payment-breakdown b { color: var(--ink); text-align: right; }
+.booking-balance-button { min-height: 40px; padding-inline: 17px; font-size: .75rem; }
+.quote-balance-note { max-width: 260px; color: var(--muted); text-align: right; line-height: 1.45; }
 .account-empty { min-height: 350px; padding: 45px; background: var(--ivory); border: 1px solid var(--line); border-radius: 18px; display: grid; place-content: center; justify-items: center; text-align: center; }
 .account-empty > svg { width: 55px; height: 55px; margin-bottom: 15px; color: var(--coral); }
 .account-empty p { color: var(--muted); }
@@ -2250,10 +2281,19 @@ h2 em {
 .pricing-panel { margin-bottom: 20px; }
 .pricing-panel__footer > .button { min-height: 42px; border-radius: 9px; font-size: .78rem; }
 .admin-bookings { margin-bottom: 20px; }
-.bookings-table { min-width: 1050px; }
+.bookings-table { min-width: 1180px; }
 .bookings-table td:first-child { display: table-cell; }
 .bookings-table td strong, .bookings-table td small { display: block; }
 .bookings-table td small { margin-top: 4px; color: #7c7974; }
+.admin-payment-cell { min-width: 235px; display: grid; gap: 7px; }
+.admin-payment-cell > strong { font-size: .78rem; }
+.admin-quote-total { display: flex; gap: 6px; }
+.admin-quote-total input { width: 105px; height: 34px; padding: 0 8px; background: white; border: 1px solid #dcd8d2; border-radius: 7px; outline: 0; }
+.admin-quote-total button,
+.cash-settle-button { width: max-content; min-height: 32px; padding: 0 10px; color: #6f3d2e; background: #fff0e9; border: 1px solid #efc5b7; border-radius: 7px; font-size: .65rem; font-weight: 700; cursor: pointer; }
+.admin-quote-total button:disabled,
+.cash-settle-button:disabled { opacity: .55; cursor: wait; }
+.cash-settle-button { color: #226b40; background: #e8f5ec; border-color: #b9dec6; }
 .booking-status-select { min-height: 36px; padding: 0 10px; border: 0; border-radius: 999px; font-size: .68rem; font-weight: 700; outline: 0; }
 .status-confirmed { color: #217543; background: #e3f5e8; }
 .status-payment_pending, .status-quote_requested { color: #9b6819; background: #fff0d7; }
@@ -2929,6 +2969,15 @@ h2 em {
   .booking-record__total {
     grid-column: 2;
     justify-items: start;
+  }
+
+  .booking-payment-breakdown {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .quote-balance-note {
+    text-align: left;
   }
 
   .brand {

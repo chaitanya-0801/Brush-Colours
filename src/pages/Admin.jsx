@@ -25,6 +25,8 @@ export default function Admin() {
   const [query, setQuery] = useState('')
   const [dashboard, setDashboard] = useState(null)
   const [allBookings, setAllBookings] = useState([])
+  const [bookingAmounts, setBookingAmounts] = useState({})
+  const [settlingId, setSettlingId] = useState('')
   const [prices, setPrices] = useState({})
   const [dirty, setDirty] = useState(new Set())
   const [saved, setSaved] = useState(false)
@@ -40,6 +42,7 @@ export default function Admin() {
       const [dashboardResult, bookingResult] = await Promise.all([api.adminDashboard(), api.adminBookings()])
       setDashboard(dashboardResult)
       setAllBookings(bookingResult.bookings)
+      setBookingAmounts(Object.fromEntries(bookingResult.bookings.map((booking) => [booking.id, booking.amount ?? ''])))
     } catch (requestError) {
       setError(requestError.message)
     }
@@ -74,6 +77,32 @@ export default function Admin() {
       await loadDashboard()
     } catch (requestError) {
       setError(requestError.message)
+    }
+  }
+
+  const saveBookingAmount = async (booking) => {
+    setSettlingId(booking.id)
+    setError('')
+    try {
+      await api.updateBookingAmount(booking.id, bookingAmounts[booking.id])
+      await loadDashboard()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSettlingId('')
+    }
+  }
+
+  const settleBalance = async (booking) => {
+    setSettlingId(booking.id)
+    setError('')
+    try {
+      await api.settleBookingBalance(booking.id)
+      await loadDashboard()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSettlingId('')
     }
   }
 
@@ -129,7 +158,7 @@ export default function Admin() {
           </section>
 
           <section className="admin-panel revenue-panel" id="monthly-revenue">
-            <div className="admin-panel__heading"><div><h2>Monthly revenue</h2><p>Paid and verified bookings only. The current month updates after every successful payment.</p></div><CircleDollarSign /></div>
+            <div className="admin-panel__heading"><div><h2>Monthly revenue</h2><p>Includes every collected ₹299 deposit, online balance and cash settlement.</p></div><CircleDollarSign /></div>
             <div className="revenue-chart">
               {(dashboard?.monthlyRevenue || []).map((item) => <div className="revenue-bar" key={item.month} title={`${item.label}: ${formatPrice(item.revenue)} from ${item.bookings} bookings`}><strong>{item.revenue ? formatPrice(item.revenue) : '—'}</strong><i style={{ height: `${Math.max(item.revenue ? 12 : 2, (item.revenue / maxRevenue) * 100)}%` }} /><span>{item.label}</span><small>{item.bookings} {item.bookings === 1 ? 'booking' : 'bookings'}</small></div>)}
             </div>
@@ -142,8 +171,34 @@ export default function Admin() {
           </section>
 
           <section className="admin-panel admin-bookings" id="bookings">
-            <div className="admin-panel__heading"><div><h2>All bookings</h2><p>Customer, city, payment and event details update from real booking records.</p></div></div>
-            <div className="pricing-table-wrap"><table className="pricing-table bookings-table"><thead><tr><th>Booking</th><th>Customer</th><th>Event</th><th>City</th><th>Amount</th><th>Status</th></tr></thead><tbody>{visibleBookings.map((booking) => <tr key={booking.id}><td><strong>{booking.id}</strong><small>{booking.activityTitle}</small></td><td><strong>{booking.customerName}</strong><small>{booking.customerEmail}</small></td><td><strong>{booking.eventDate}</strong><small>{booking.eventTime} · {booking.guests} guests</small></td><td>{booking.city}</td><td>{booking.amount == null ? 'Quote' : formatPrice(booking.amount)}<small>{booking.paymentStatus}</small></td><td><select className={`booking-status-select status-${booking.status}`} value={booking.status} onChange={(event) => changeStatus(booking.id, event.target.value)}><option value="quote_requested">Quote requested</option><option value="payment_pending">Payment pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select></td></tr>)}</tbody></table>{!visibleBookings.length && <div className="admin-empty">No bookings match this search yet.</div>}</div>
+            <div className="admin-panel__heading"><div><h2>All bookings</h2><p>Deposits, online balances and cash collections update revenue automatically.</p></div></div>
+            <div className="pricing-table-wrap">
+              <table className="pricing-table bookings-table">
+                <thead><tr><th>Booking</th><th>Customer</th><th>Event</th><th>City</th><th>Payment</th><th>Status</th></tr></thead>
+                <tbody>{visibleBookings.map((booking) => (
+                  <tr key={booking.id}>
+                    <td><strong>{booking.id}</strong><small>{booking.activityTitle}</small></td>
+                    <td><strong>{booking.customerName}</strong><small>{booking.customerEmail}</small></td>
+                    <td><strong>{booking.eventDate}</strong><small>{booking.eventTime} · {booking.guests} guests</small></td>
+                    <td>{booking.city}</td>
+                    <td>
+                      <div className="admin-payment-cell">
+                        {booking.amount == null ? (
+                          <div className="admin-quote-total">
+                            <input aria-label={`Final total for ${booking.id}`} type="number" min={booking.amountPaid} placeholder="Final total" value={bookingAmounts[booking.id] ?? ''} onChange={(event) => setBookingAmounts({ ...bookingAmounts, [booking.id]: event.target.value })} />
+                            <button disabled={settlingId === booking.id || !bookingAmounts[booking.id]} onClick={() => saveBookingAmount(booking)}>Set total</button>
+                          </div>
+                        ) : <strong>{formatPrice(booking.amount)} total</strong>}
+                        <small>{formatPrice(booking.amountPaid)} paid · {booking.balanceAmount == null ? 'balance pending quote' : `${formatPrice(booking.balanceAmount)} due`}</small>
+                        {booking.balanceAmount > 0 && booking.status !== 'cancelled' && <button className="cash-settle-button" disabled={settlingId === booking.id} onClick={() => settleBalance(booking)}>{settlingId === booking.id ? 'Updating…' : 'Mark balance paid in cash'}</button>}
+                      </div>
+                    </td>
+                    <td><select className={`booking-status-select status-${booking.status}`} value={booking.status} onChange={(event) => changeStatus(booking.id, event.target.value)}><option value="quote_requested">Quote requested</option><option value="payment_pending">Payment pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select></td>
+                  </tr>
+                ))}</tbody>
+              </table>
+              {!visibleBookings.length && <div className="admin-empty">No bookings match this search yet.</div>}
+            </div>
           </section>
         </div>
       </main>

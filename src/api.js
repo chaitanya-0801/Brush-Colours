@@ -24,10 +24,12 @@ export const api = {
   changePassword: (details) => request('/auth/change-password', { method: 'POST', body: JSON.stringify(details) }),
   createBooking: (details) => request('/bookings', { method: 'POST', body: JSON.stringify(details) }),
   myBookings: () => request('/bookings/mine'),
-  createPaymentOrder: (bookingId) => request('/payments/create-order', { method: 'POST', body: JSON.stringify({ bookingId }) }),
+  createPaymentOrder: (bookingId, paymentKind = 'deposit') => request('/payments/create-order', { method: 'POST', body: JSON.stringify({ bookingId, paymentKind }) }),
   verifyPayment: (details) => request('/payments/verify', { method: 'POST', body: JSON.stringify(details) }),
   adminDashboard: () => request('/admin/dashboard'),
   adminBookings: (search = '') => request(`/admin/bookings?search=${encodeURIComponent(search)}`),
   updateActivity: (id, price) => request(`/admin/activities/${id}`, { method: 'PATCH', body: JSON.stringify({ price }) }),
   updateBookingStatus: (id, status) => request(`/admin/bookings/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  updateBookingAmount: (id, amount) => request(`/admin/bookings/${id}/amount`, { method: 'PATCH', body: JSON.stringify({ amount }) }),
+  settleBookingBalance: (id) => request(`/admin/bookings/${id}/settle-balance`, { method: 'POST' }),
 }

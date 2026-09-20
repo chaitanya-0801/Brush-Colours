@@ -25,6 +25,7 @@ export default function ExperienceCard({ activity, compact = false }) {
           <p className="experience-card__price">
             <strong>{formatPrice(activity.price)}</strong>
             <span>{activity.priceUnit}</span>
+            <span className="experience-card__prebook">Pre-book ₹299</span>
           </p>
         </div>
         {!compact && <p className="experience-card__description">{activity.short}</p>}

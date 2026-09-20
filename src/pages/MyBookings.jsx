@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { CalendarDays, LogOut, MapPin, ReceiptIndianRupee, UsersRound } from 'lucide-react'
+import { CalendarDays, LogOut, MapPin, UsersRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../data'
+import { completePayment } from '../payments'
 
 const statusLabel = (status) => ({ quote_requested: 'Quote requested', payment_pending: 'Payment pending', confirmed: 'Confirmed', cancelled: 'Cancelled' }[status] || status)
 
@@ -13,6 +14,7 @@ export default function MyBookings() {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [payingId, setPayingId] = useState('')
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -23,6 +25,21 @@ export default function MyBookings() {
   const signOut = async () => {
     await logout()
     navigate('/')
+  }
+
+  const payOutstanding = async (booking) => {
+    setPayingId(booking.id)
+    setError('')
+    try {
+      const paymentKind = booking.amountPaid < booking.depositAmount ? 'deposit' : 'balance'
+      const order = await api.createPaymentOrder(booking.id, paymentKind)
+      const result = await completePayment(order, booking.id, user)
+      setBookings((current) => current.map((item) => item.id === booking.id ? result.booking : item))
+    } catch (paymentError) {
+      setError(paymentError.message)
+    } finally {
+      setPayingId('')
+    }
   }
 
   return (
@@ -41,7 +58,20 @@ export default function MyBookings() {
             <article className="booking-record" key={booking.id}>
               <div className="booking-record__date"><strong>{new Date(`${booking.eventDate}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit' })}</strong><span>{new Date(`${booking.eventDate}T00:00:00`).toLocaleDateString('en-IN', { month: 'short' })}</span></div>
               <div className="booking-record__main"><small>{booking.id}</small><h2>{booking.activityTitle}</h2><div><span><CalendarDays /> {booking.eventDate} · {booking.eventTime}</span><span><MapPin /> {booking.city}</span><span><UsersRound /> {booking.guests} guests</span></div></div>
-              <div className="booking-record__total"><span className={`status-pill status-pill--${booking.status.replaceAll('_', '-')}`}><i />{statusLabel(booking.status)}</span><strong><ReceiptIndianRupee /> {booking.amount == null ? 'Custom quote' : formatPrice(booking.amount)}</strong></div>
+              <div className="booking-record__total">
+                <span className={`status-pill status-pill--${booking.status.replaceAll('_', '-')}`}><i />{statusLabel(booking.status)}</span>
+                <div className="booking-payment-breakdown">
+                  <span>Total <b>{booking.amount == null ? 'Final quote pending' : formatPrice(booking.amount)}</b></span>
+                  <span>Paid <b>{formatPrice(booking.amountPaid)}</b></span>
+                  <span>Balance <b>{booking.balanceAmount == null ? 'To be confirmed' : formatPrice(booking.balanceAmount)}</b></span>
+                </div>
+                {booking.status !== 'cancelled' && booking.paymentStatus !== 'paid' && (booking.amountPaid < booking.depositAmount || booking.balanceAmount > 0) && (
+                  <button className="button button--coral booking-balance-button" disabled={payingId === booking.id} onClick={() => payOutstanding(booking)}>
+                    {payingId === booking.id ? 'Processing…' : booking.amountPaid < booking.depositAmount ? `Pay ${formatPrice(booking.depositAmount)} to pre-book` : `Pay balance ${formatPrice(booking.balanceAmount)}`}
+                  </button>
+                )}
+                {booking.amountPaid >= booking.depositAmount && booking.balanceAmount == null && <small className="quote-balance-note">The owner will set the final price before online balance payment.</small>}
+              </div>
             </article>
           ))}
         </section>
