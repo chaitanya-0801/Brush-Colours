@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.npm-cache/
+.idea/
+*.local
+
+# Local environment and secret files
+.env
+.env.*
+!.env.example
+
+# Operating-system files
+.DS_Store
+Thumbs.db
