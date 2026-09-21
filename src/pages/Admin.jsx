@@ -9,7 +9,7 @@ import { api } from '../api'
 import AdminActivityEditor from '../components/AdminActivityEditor'
 import { useActivities } from '../context/ActivityContext'
 import { useAuth } from '../context/AuthContext'
-import { formatPrice } from '../data'
+import { activityImageStyle, formatPrice } from '../data'
 import { useTheme } from '../context/ThemeContext'
 
 const menuItems = [
@@ -221,7 +221,7 @@ export default function Admin() {
 
           <section className="admin-panel pricing-panel" id="activities-&-pricing">
             <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Add events, upload photos, edit descriptions, choose cities and create customer-facing time slots.</p></div><button className="button button--coral" onClick={() => setActivityEditor({ mode: 'create' })}><Plus /> Add event</button></div>
-            <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Price</th><th>Time slots</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><img src={activity.image} alt="" /><span><strong>{activity.title}</strong><small>{activity.short}</small></span></td><td className="capitalize">{activity.category}</td><td><strong>{formatPrice(activity.price)}</strong><small>{activity.priceUnit}</small></td><td><strong>{activity.timeSlots.length}</strong><small>{activity.locations.length} cities</small></td><td><span className={`status-pill ${activity.active ? 'status-pill--confirmed' : 'status-pill--cancelled'}`}><i /> {activity.active ? 'Active' : 'Hidden'}</span></td><td><div className="admin-row-actions"><button onClick={() => setActivityEditor({ mode: 'edit', activity })} title="Edit event"><Edit3 /></button><button className="danger" onClick={() => deleteActivity(activity)} title="Archive event"><Trash2 /></button></div></td></tr>)}</tbody></table></div>
+            <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Price</th><th>Time slots</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><span className="admin-activity-thumb"><img src={activity.image} alt="" style={activityImageStyle(activity)} /></span><span><strong>{activity.title}</strong><small>{activity.short}</small></span></td><td className="capitalize">{activity.category}</td><td><strong>{formatPrice(activity.price)}</strong><small>{activity.priceUnit}</small></td><td><strong>{activity.timeSlots.length}</strong><small>{activity.locations.length} cities</small></td><td><span className={`status-pill ${activity.active ? 'status-pill--confirmed' : 'status-pill--cancelled'}`}><i /> {activity.active ? 'Active' : 'Hidden'}</span></td><td><div className="admin-row-actions"><button onClick={() => setActivityEditor({ mode: 'edit', activity })} title="Edit event"><Edit3 /></button><button className="danger" onClick={() => deleteActivity(activity)} title="Archive event"><Trash2 /></button></div></td></tr>)}</tbody></table></div>
             <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} of {adminActivities.length} database events</span><span>Archived events keep their existing bookings.</span></div>
           </section>
 

@@ -34,7 +34,7 @@ export default function MyBookings() {
     try {
       const paymentKind = booking.amountPaid < booking.depositAmount ? 'deposit' : 'balance'
       const order = await api.createPaymentOrder(booking.id, paymentKind)
-      const result = await completePayment(order, booking.id, user)
+      const result = await completePayment(order, booking.id, user, booking.contactPhone)
       setBookings((current) => current.map((item) => item.id === booking.id ? result.booking : item))
     } catch (paymentError) {
       setError(paymentError.message)

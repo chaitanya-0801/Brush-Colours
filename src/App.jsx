@@ -7,6 +7,7 @@ import Auth from './pages/Auth'
 import MyBookings from './pages/MyBookings'
 import Profile from './pages/Profile'
 import GroupEvents from './pages/GroupEvents'
+import LegalPage from './pages/LegalPage'
 import ScrollToTop from './components/ScrollToTop'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -19,6 +20,10 @@ export default function App() {
         <Route path="/experiences" element={<Experiences />} />
         <Route path="/experience/:id" element={<ExperienceDetail />} />
         <Route path="/group-events" element={<GroupEvents />} />
+        <Route path="/terms" element={<LegalPage page="terms" />} />
+        <Route path="/privacy" element={<LegalPage page="privacy" />} />
+        <Route path="/cancellation-refund-policy" element={<LegalPage page="refunds" />} />
+        <Route path="/service-delivery-policy" element={<LegalPage page="delivery" />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/signup" element={<Auth />} />
         <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />

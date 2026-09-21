@@ -17,7 +17,7 @@ function loadRazorpay() {
   return razorpayScript
 }
 
-export async function completePayment(order, bookingId, user) {
+export async function completePayment(order, bookingId, user, contact = '') {
   if (order.provider === 'development') {
     return api.verifyPayment({ bookingId, orderId: order.orderId })
   }
@@ -34,7 +34,8 @@ export async function completePayment(order, bookingId, user) {
       order_id: order.orderId,
       name: 'Brush&Colours',
       description: order.paymentKind === 'deposit' ? '₹299 event pre-booking' : 'Event balance payment',
-      prefill: { name: user?.name || '', email: user?.email || '' },
+      prefill: { name: user?.name || '', email: user?.email || '', contact },
+      retry: { enabled: true, max_count: 3 },
       theme: { color: '#ec8768' },
       handler: async (response) => {
         try {

@@ -5,6 +5,7 @@ import Footer from '../components/Footer'
 import BookingPanel from '../components/BookingPanel'
 import ExperienceCard from '../components/ExperienceCard'
 import { useActivities } from '../context/ActivityContext'
+import { activityImageStyle } from '../data'
 
 export default function ExperienceDetail() {
   const { id } = useParams()
@@ -23,7 +24,7 @@ export default function ExperienceDetail() {
         <section className="shell detail-layout">
           <div className="detail-main">
             <div className="detail-image">
-              <img src={activity.image} alt={`${activity.title} experience`} />
+              <img src={activity.image} alt={`${activity.title} experience`} style={activityImageStyle(activity)} />
               <span>{activity.badge}</span>
             </div>
             <div className="detail-heading">

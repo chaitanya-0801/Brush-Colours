@@ -1,11 +1,12 @@
-import { ImagePlus, Plus, Trash2, X } from 'lucide-react'
+import { ImagePlus, Plus, RotateCcw, Trash2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { api } from '../api'
-import { serviceCities } from '../data'
+import { activityImageStyle, serviceCities } from '../data'
 
 const emptyActivity = {
   title: '', category: 'birthday', short: '', description: '', price: '', priceUnit: 'per event',
   duration: '2 hrs', guests: '1-20 guests', badge: 'New', minLeadDays: 2, image: '', imagePublicId: '',
+  imagePositionX: 50, imagePositionY: 50, imageZoom: 1,
   locations: [...serviceCities], includes: ['All activity materials', 'Professional facilitator'],
   timeSlots: [{ id: 'morning', label: '11:00 AM - 1:00 PM', start: '11:00', end: '13:00', active: true }],
   guestPricing: { enabled: false, includedGuests: 10, percentPerExtraGuest: 5, maxGuests: 100 },
@@ -15,6 +16,9 @@ const emptyActivity = {
 const makeForm = (activity) => activity ? {
   ...activity,
   price: activity.price ?? '',
+  imagePositionX: activity.imagePositionX ?? 50,
+  imagePositionY: activity.imagePositionY ?? 50,
+  imageZoom: activity.imageZoom ?? 1,
   locations: [...(activity.locations || [])],
   includes: [...(activity.includes || [])],
   timeSlots: (activity.timeSlots || []).map((slot) => ({ ...slot })),
@@ -46,7 +50,14 @@ export default function AdminActivityEditor({ activity, onClose, onSaved }) {
     setError('')
     try {
       const result = await api.uploadActivityImage(file)
-      setForm((current) => ({ ...current, image: result.image.url, imagePublicId: result.image.publicId }))
+      setForm((current) => ({
+        ...current,
+        image: result.image.url,
+        imagePublicId: result.image.publicId,
+        imagePositionX: 50,
+        imagePositionY: 50,
+        imageZoom: 1,
+      }))
     } catch (uploadError) {
       setError(uploadError.message)
     } finally {
@@ -72,6 +83,9 @@ export default function AdminActivityEditor({ activity, onClose, onSaved }) {
       minLeadDays: Number(form.minLeadDays),
       imageUrl: form.image,
       imagePublicId: form.imagePublicId,
+      imagePositionX: Number(form.imagePositionX),
+      imagePositionY: Number(form.imagePositionY),
+      imageZoom: Number(form.imageZoom),
       locations: form.locations,
       includes: form.includes.map((item) => item.trim()).filter(Boolean),
       timeSlots: form.timeSlots.map((slot, index) => ({ ...slot, id: slot.id || `slot-${index + 1}`, active: true })),
@@ -119,10 +133,18 @@ export default function AdminActivityEditor({ activity, onClose, onSaved }) {
           <section>
             <h3>Cover photo</h3>
             <div className="admin-image-field">
-              {form.image ? <img src={form.image} alt="Event preview" /> : <div><ImagePlus /><span>No photo yet</span></div>}
+              <div className="admin-image-preview">
+                {form.image ? <img src={form.image} alt="Event preview" style={activityImageStyle(form)} /> : <div className="admin-image-empty"><ImagePlus /><span>No photo yet</span></div>}
+              </div>
               <label className="button button--outline"><ImagePlus /> {uploading ? 'Uploading…' : 'Upload photo'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={uploadImage} /></label>
             </div>
-            <label className="admin-url-field">Or use an image URL<input required type="url" value={form.image} onChange={(event) => { update('image', event.target.value); update('imagePublicId', '') }} placeholder="https://..." /></label>
+            <label className="admin-url-field">Or use an image URL<input required type="url" value={form.image} onChange={(event) => setForm((current) => ({ ...current, image: event.target.value, imagePublicId: '', imagePositionX: 50, imagePositionY: 50, imageZoom: 1 }))} placeholder="https://..." /></label>
+            {form.image && <div className="admin-image-adjustments">
+              <div className="admin-image-adjustments__heading"><div><h3>Adjust photo</h3><p>Move the focal point and zoom until the card crop looks right.</p></div><button type="button" onClick={() => setForm((current) => ({ ...current, imagePositionX: 50, imagePositionY: 50, imageZoom: 1 }))}><RotateCcw /> Reset</button></div>
+              <label><span>Left ↔ right <b>{Math.round(form.imagePositionX)}%</b></span><input type="range" min="0" max="100" value={form.imagePositionX} onChange={(event) => update('imagePositionX', Number(event.target.value))} /></label>
+              <label><span>Top ↕ bottom <b>{Math.round(form.imagePositionY)}%</b></span><input type="range" min="0" max="100" value={form.imagePositionY} onChange={(event) => update('imagePositionY', Number(event.target.value))} /></label>
+              <label><span>Zoom <b>{Math.round(form.imageZoom * 100)}%</b></span><input type="range" min="1" max="2" step="0.05" value={form.imageZoom} onChange={(event) => update('imageZoom', Number(event.target.value))} /></label>
+            </div>}
             <h3>Available cities</h3>
             <div className="admin-check-grid">{serviceCities.map((city) => <label key={city}><input type="checkbox" checked={form.locations.includes(city)} onChange={() => toggleCity(city)} /> {city}</label>)}</div>
             <h3>Package includes</h3>

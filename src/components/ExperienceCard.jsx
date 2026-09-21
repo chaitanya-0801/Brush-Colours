@@ -1,6 +1,6 @@
 import { Clock3, Heart, MapPin, Star, UsersRound } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { formatPrice } from '../data'
+import { activityImageStyle, formatPrice } from '../data'
 import { useAuth } from '../context/AuthContext'
 import { useState } from 'react'
 
@@ -29,7 +29,7 @@ export default function ExperienceCard({ activity, compact = false }) {
     <article className={`experience-card ${compact ? 'experience-card--compact' : ''}`}>
       <div className="experience-card__media">
         <Link className="experience-card__image-link" to={`/experience/${activity.id}`} aria-label={`View ${activity.title}`}>
-          <img src={activity.image} alt={activity.title} loading="lazy" />
+          <img src={activity.image} alt={activity.title} loading="lazy" style={activityImageStyle(activity)} />
         </Link>
         <span className="experience-card__badge">{activity.badge}</span>
         {user?.role !== 'admin' && <button

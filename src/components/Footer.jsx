@@ -38,7 +38,7 @@ export default function Footer() {
       </div>
       <div className="shell footer__bottom">
         <span>© 2026 Brush&amp;Colours</span>
-        <div><a href="#terms">Terms</a><a href="#privacy">Privacy</a><a href="#refunds">Refunds</a></div>
+        <div><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cancellation-refund-policy">Refunds</Link><Link to="/service-delivery-policy">Service delivery</Link></div>
       </div>
     </footer>
   )

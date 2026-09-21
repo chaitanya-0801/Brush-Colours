@@ -29,3 +29,14 @@ export const formatPrice = (price) => {
     maximumFractionDigits: 0,
   }).format(price)
 }
+
+export const activityImageStyle = (activity = {}) => {
+  const x = Number(activity.imagePositionX ?? 50)
+  const y = Number(activity.imagePositionY ?? 50)
+  const zoom = Number(activity.imageZoom ?? 1)
+  return {
+    objectPosition: `${x}% ${y}%`,
+    transformOrigin: `${x}% ${y}%`,
+    transform: `scale(${zoom})`,
+  }
+}

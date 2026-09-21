@@ -3,7 +3,7 @@ import { CalendarDays, CheckCircle2, ChevronDown, Download, Minus, Plus, ShieldC
 import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { useAuth } from '../context/AuthContext'
-import { formatPrice, serviceCities } from '../data'
+import { activityImageStyle, formatPrice, serviceCities } from '../data'
 import { completePayment } from '../payments'
 
 const PREBOOK_AMOUNT = 299
@@ -90,7 +90,7 @@ export default function BookingPanel({ activity }) {
     setSubmitting(true)
     setError('')
     try {
-      const result = await completePayment(paymentOrder, booking.id, user)
+      const result = await completePayment(paymentOrder, booking.id, user, form.phone)
       setBooking(result.booking)
       setStage('success')
     } catch (paymentError) {
@@ -130,7 +130,7 @@ export default function BookingPanel({ activity }) {
             ) : (
               <form onSubmit={submitBooking}>
                 <span className="kicker">Confirm the details</span><h2>Pre-book this experience</h2>
-                <div className="checkout-summary"><img src={activity.image} alt="" /><div><strong>{activity.title}</strong><span>{date} · {selectedSlot?.label}</span><span>{guests} guests · {city}</span></div><b>{formatPrice(estimatedTotal)}</b></div>
+                <div className="checkout-summary"><span className="checkout-summary__image"><img src={activity.image} alt="" style={activityImageStyle(activity)} /></span><div><strong>{activity.title}</strong><span>{date} · {selectedSlot?.label}</span><span>{guests} guests · {city}</span></div><b>{formatPrice(estimatedTotal)}</b></div>
                 {error && <div className="form-error">{error}</div>}
                 <div className="form-grid">
                   <label>Customer<input value={user.name} disabled /></label>
