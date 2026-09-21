@@ -4,7 +4,6 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import BookingPanel from '../components/BookingPanel'
 import ExperienceCard from '../components/ExperienceCard'
-import { serviceCities } from '../data'
 import { useActivities } from '../context/ActivityContext'
 
 export default function ExperienceDetail() {
@@ -37,7 +36,7 @@ export default function ExperienceDetail() {
             <div className="detail-facts">
               <span><Clock3 /> <b>{activity.duration}</b><small>Experience length</small></span>
               <span><UsersRound /> <b>{activity.guests}</b><small>Group size</small></span>
-              <span><MapPin /> <b>{serviceCities.join(' · ')}</b><small>Service area</small></span>
+              <span><MapPin /> <b>{activity.locations?.join(' · ') || 'Service area confirmed after booking'}</b><small>Service area</small></span>
               <span><ShieldCheck /> <b>Verified host</b><small>Curated by our team</small></span>
             </div>
             <article className="detail-copy">

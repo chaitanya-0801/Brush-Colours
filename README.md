@@ -1,4 +1,4 @@
-# Brush&Colours frontend
+git# Brush&Colours frontend
 
 A React + Vite customer and admin application for Brush&Colours' birthday, wedding and workshop experience platform. This project does not use Next.js and connects to the Express API in the adjacent `Backend` folder.
 
@@ -8,11 +8,12 @@ A React + Vite customer and admin application for Brush&Colours' birthday, weddi
 - Birthday, wedding and workshop catalogue with search, city selection, category filtering and price sorting
 - Experience detail pages
 - Customer sign-up, sign-in, sign-out and private booking history
-- City, guest, date, time, contact and venue selection
+- City, guest, date, database-managed time slot, contact and venue selection
 - Backend-enforced booking lead times with same-day booking blocked
 - Database-backed bookings and a clearly labelled local test-payment flow
 - Role-protected responsive admin dashboard for Garima
-- Database-backed activity pricing, bookings, payment states and monthly revenue
+- Full database-backed event CRUD, photo uploads, dynamic slots, guest pricing, bookings, refunds and monthly revenue
+- Customer cancellation and downloadable PDF receipts
 
 ## Start locally
 
@@ -51,13 +52,13 @@ npm run preview
 
 ## Content and branding
 
-Activity copy and image URLs live in `src/data.js`; live prices come from the backend database. Global colours and typography live at the top of `src/styles.css`.
+Events are loaded entirely from MongoDB. Admin can create, edit, hide or archive them from `/admin`; customer screens no longer contain a hard-coded event catalogue. `src/data.js` contains only stable city/category presentation metadata. Global colours and typography live at the top of `src/styles.css`.
 
 The current name, statistics, activities, contact address and testimonials are polished placeholders. Replace them with verified business information before launch.
 
 ## Before production
 
-The included backend already owns prices, authentication, bookings and revenue calculations. Local payments are intentionally marked as tests and charge no money. Before launch, complete payment-provider onboarding, add the provider's customer checkout with explicit data-sharing consent, configure verified webhooks, enable HTTPS, replace all development secrets and publish cancellation/refund policies.
+The backend owns events, prices, authentication, bookings, receipts and revenue calculations. Before launch, configure MongoDB, Cloudinary and Razorpay, add the verified Razorpay webhook, keep demo payments disabled, enable HTTPS, replace all development secrets and publish the cancellation/refund policy.
 
 ## Media
 

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Bell, CalendarDays, Check, ChevronDown, CircleDollarSign, Clock3, IndianRupee,
-  LayoutDashboard, LogOut, Menu, PackageOpen, Search, ShieldCheck, UsersRound,
-  WalletCards, X,
+  Bell, CalendarDays, ChevronDown, CircleDollarSign, Clock3, Edit3, IndianRupee,
+  LayoutDashboard, LogOut, Menu, PackageOpen, Plus, Search, ShieldCheck, Trash2,
+  UsersRound, WalletCards, X,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import AdminActivityEditor from '../components/AdminActivityEditor'
 import { useActivities } from '../context/ActivityContext'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../data'
@@ -25,47 +26,47 @@ export default function Admin() {
   const [query, setQuery] = useState('')
   const [dashboard, setDashboard] = useState(null)
   const [allBookings, setAllBookings] = useState([])
+  const [adminActivities, setAdminActivities] = useState([])
   const [bookingAmounts, setBookingAmounts] = useState({})
+  const [guestChanges, setGuestChanges] = useState({})
   const [settlingId, setSettlingId] = useState('')
-  const [prices, setPrices] = useState({})
-  const [dirty, setDirty] = useState(new Set())
-  const [saved, setSaved] = useState(false)
+  const [activityEditor, setActivityEditor] = useState(false)
   const [error, setError] = useState('')
   const [securityOpen, setSecurityOpen] = useState(false)
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' })
-  const { activities, refreshActivities } = useActivities()
+  const { refreshActivities } = useActivities()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   const loadDashboard = async () => {
     try {
-      const [dashboardResult, bookingResult] = await Promise.all([api.adminDashboard(), api.adminBookings()])
+      const [dashboardResult, bookingResult, activityResult] = await Promise.all([api.adminDashboard(), api.adminBookings(), api.getAdminActivities()])
       setDashboard(dashboardResult)
       setAllBookings(bookingResult.bookings)
+      setAdminActivities(activityResult.activities)
       setBookingAmounts(Object.fromEntries(bookingResult.bookings.map((booking) => [booking.id, booking.amount ?? ''])))
+      setGuestChanges(Object.fromEntries(bookingResult.bookings.map((booking) => [booking.id, { guests: booking.guests, percentage: booking.guestAdjustment?.percentagePerGuest || 0 }])))
     } catch (requestError) {
       setError(requestError.message)
     }
   }
 
   useEffect(() => { loadDashboard() }, [])
-  useEffect(() => { setPrices(Object.fromEntries(activities.map((item) => [item.id, item.price]))) }, [activities])
-  useEffect(() => {
-    if (!saved) return undefined
-    const timer = window.setTimeout(() => setSaved(false), 2400)
-    return () => window.clearTimeout(timer)
-  }, [saved])
 
-  const visibleActivities = useMemo(() => activities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())), [activities, query])
+  const visibleActivities = useMemo(() => adminActivities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())), [adminActivities, query])
   const visibleBookings = useMemo(() => allBookings.filter((booking) => `${booking.id} ${booking.activityTitle} ${booking.customerName} ${booking.customerEmail} ${booking.city}`.toLowerCase().includes(query.toLowerCase())), [allBookings, query])
 
-  const savePrices = async () => {
+  const activitySaved = async () => {
+    await Promise.all([loadDashboard(), refreshActivities()])
+    setActivityEditor(false)
+  }
+
+  const deleteActivity = async (activity) => {
+    if (!window.confirm(`Archive “${activity.title}”? It will disappear from the customer website, but existing bookings will be preserved.`)) return
     setError('')
     try {
-      await Promise.all([...dirty].map((id) => api.updateActivity(id, prices[id])))
-      await refreshActivities()
-      setDirty(new Set())
-      setSaved(true)
+      await api.deleteActivity(activity.id)
+      await activitySaved()
     } catch (requestError) {
       setError(requestError.message)
     }
@@ -98,6 +99,32 @@ export default function Admin() {
     setError('')
     try {
       await api.settleBookingBalance(booking.id)
+      await loadDashboard()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSettlingId('')
+    }
+  }
+
+  const recalculateGuests = async (booking) => {
+    setSettlingId(booking.id)
+    setError('')
+    try {
+      await api.updateBookingGuests(booking.id, { ...guestChanges[booking.id], reason: 'Guest count updated by admin' })
+      await loadDashboard()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSettlingId('')
+    }
+  }
+
+  const completeRefund = async (booking) => {
+    if (!window.confirm(`Confirm that ${formatPrice(booking.cancellation.refundableAmount)} has been refunded outside the website?`)) return
+    setSettlingId(booking.id)
+    try {
+      await api.completeRefund(booking.id)
       await loadDashboard()
     } catch (requestError) {
       setError(requestError.message)
@@ -165,9 +192,9 @@ export default function Admin() {
           </section>
 
           <section className="admin-panel pricing-panel" id="activities-&-pricing">
-            <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Changes are stored in the database and apply only to new bookings.</p></div></div>
-            <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Current price</th><th>Status</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><img src={activity.image} alt="" /><strong>{activity.title}</strong></td><td className="capitalize">{activity.category}</td><td><div className="price-input"><IndianRupee /><input aria-label={`${activity.title} price`} type="number" min="0" placeholder="Request quote" value={prices[activity.id] ?? ''} onChange={(event) => { setPrices({ ...prices, [activity.id]: event.target.value === '' ? null : Number(event.target.value) }); setDirty(new Set(dirty).add(activity.id)) }} /></div></td><td><span className="status-pill status-pill--confirmed"><i /> Active</span></td></tr>)}</tbody></table></div>
-            <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} of {activities.length} activities</span><button className="button button--coral" disabled={!dirty.size} onClick={savePrices}>{saved ? <><Check /> Saved</> : `Save ${dirty.size || ''} changes`}</button></div>
+            <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Add events, upload photos, edit descriptions, choose cities and create customer-facing time slots.</p></div><button className="button button--coral" onClick={() => setActivityEditor({ mode: 'create' })}><Plus /> Add event</button></div>
+            <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Price</th><th>Time slots</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><img src={activity.image} alt="" /><span><strong>{activity.title}</strong><small>{activity.short}</small></span></td><td className="capitalize">{activity.category}</td><td><strong>{formatPrice(activity.price)}</strong><small>{activity.priceUnit}</small></td><td><strong>{activity.timeSlots.length}</strong><small>{activity.locations.length} cities</small></td><td><span className={`status-pill ${activity.active ? 'status-pill--confirmed' : 'status-pill--cancelled'}`}><i /> {activity.active ? 'Active' : 'Hidden'}</span></td><td><div className="admin-row-actions"><button onClick={() => setActivityEditor({ mode: 'edit', activity })} title="Edit event"><Edit3 /></button><button className="danger" onClick={() => deleteActivity(activity)} title="Archive event"><Trash2 /></button></div></td></tr>)}</tbody></table></div>
+            <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} of {adminActivities.length} database events</span><span>Archived events keep their existing bookings.</span></div>
           </section>
 
           <section className="admin-panel admin-bookings" id="bookings">
@@ -179,7 +206,7 @@ export default function Admin() {
                   <tr key={booking.id}>
                     <td><strong>{booking.id}</strong><small>{booking.activityTitle}</small></td>
                     <td><strong>{booking.customerName}</strong><small>{booking.customerEmail}</small></td>
-                    <td><strong>{booking.eventDate}</strong><small>{booking.eventTime} · {booking.guests} guests</small></td>
+                    <td><strong>{booking.eventDate}</strong><small>{booking.eventTime} · {booking.guests} guests</small><details className="guest-adjuster"><summary>Adjust guests & price</summary><label>Guests<input type="number" min="1" value={guestChanges[booking.id]?.guests ?? booking.guests} onChange={(event) => setGuestChanges({ ...guestChanges, [booking.id]: { ...guestChanges[booking.id], guests: event.target.value } })} /></label><label>% per extra guest<input type="number" min="0" max="100" step="0.5" value={guestChanges[booking.id]?.percentage ?? 0} onChange={(event) => setGuestChanges({ ...guestChanges, [booking.id]: { ...guestChanges[booking.id], percentage: event.target.value } })} /></label><button disabled={settlingId === booking.id} onClick={() => recalculateGuests(booking)}>Recalculate total</button></details></td>
                     <td>{booking.city}</td>
                     <td>
                       <div className="admin-payment-cell">
@@ -191,9 +218,10 @@ export default function Admin() {
                         ) : <strong>{formatPrice(booking.amount)} total</strong>}
                         <small>{formatPrice(booking.amountPaid)} paid · {booking.balanceAmount == null ? 'balance pending quote' : `${formatPrice(booking.balanceAmount)} due`}</small>
                         {booking.balanceAmount > 0 && booking.status !== 'cancelled' && <button className="cash-settle-button" disabled={settlingId === booking.id} onClick={() => settleBalance(booking)}>{settlingId === booking.id ? 'Updating…' : 'Mark balance paid in cash'}</button>}
+                        {['pending', 'manual_required'].includes(booking.cancellation?.refundStatus) && <button className="cash-settle-button refund-button" disabled={settlingId === booking.id} onClick={() => completeRefund(booking)}>Confirm {formatPrice(booking.cancellation.refundableAmount)} refund processed</button>}
                       </div>
                     </td>
-                    <td><select className={`booking-status-select status-${booking.status}`} value={booking.status} onChange={(event) => changeStatus(booking.id, event.target.value)}><option value="quote_requested">Quote requested</option><option value="payment_pending">Payment pending</option><option value="confirmed">Confirmed</option><option value="cancelled">Cancelled</option></select></td>
+                    <td><select className={`booking-status-select status-${booking.status}`} value={booking.status} onChange={(event) => changeStatus(booking.id, event.target.value)}><option value="quote_requested">Quote requested</option><option value="payment_pending">Payment pending</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></td>
                   </tr>
                 ))}</tbody>
               </table>
@@ -204,6 +232,7 @@ export default function Admin() {
       </main>
 
       {securityOpen && <div className="modal-backdrop" onMouseDown={() => setSecurityOpen(false)}><form className="checkout-modal security-modal" onSubmit={changePassword} onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSecurityOpen(false)}><X /></button><span className="kicker">Admin security</span><h2>Change your password</h2><p>You will be signed out after the password is changed.</p>{error && <div className="form-error">{error}</div>}<div className="form-grid"><label className="span-two">Current password<input required type="password" value={passwords.currentPassword} onChange={(event) => setPasswords({ ...passwords, currentPassword: event.target.value })} /></label><label className="span-two">New password<input required minLength="8" type="password" value={passwords.newPassword} onChange={(event) => setPasswords({ ...passwords, newPassword: event.target.value })} /></label></div><button className="button button--coral button--wide">Change password</button></form></div>}
+      {activityEditor && <AdminActivityEditor activity={activityEditor.mode === 'edit' ? activityEditor.activity : null} onClose={() => setActivityEditor(false)} onSaved={activitySaved} />}
     </div>
   )
 }

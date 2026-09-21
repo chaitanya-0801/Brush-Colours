@@ -1,28 +1,32 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
-import { activities as catalogueActivities } from '../data'
 
 const ActivityContext = createContext(null)
 
-const mergeActivities = (backendActivities) => catalogueActivities.map((activity) => ({
-  ...activity,
-  ...(backendActivities.find((item) => item.id === activity.id) || {}),
-}))
-
 export function ActivityProvider({ children }) {
-  const [activities, setActivities] = useState(catalogueActivities)
+  const [activities, setActivities] = useState([])
+  const [loadingActivities, setLoadingActivities] = useState(true)
+  const [activityError, setActivityError] = useState('')
 
   const refreshActivities = async () => {
-    const result = await api.getActivities()
-    setActivities(mergeActivities(result.activities))
-    return result.activities
+    try {
+      const result = await api.getActivities()
+      setActivities(result.activities)
+      setActivityError('')
+      return result.activities
+    } catch (error) {
+      setActivityError(error.message)
+      throw error
+    } finally {
+      setLoadingActivities(false)
+    }
   }
 
   useEffect(() => {
     refreshActivities().catch(() => {})
   }, [])
 
-  const value = useMemo(() => ({ activities, refreshActivities }), [activities])
+  const value = useMemo(() => ({ activities, loadingActivities, activityError, refreshActivities }), [activities, loadingActivities, activityError])
   return <ActivityContext.Provider value={value}>{children}</ActivityContext.Provider>
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CalendarDays, LogOut, MapPin, UsersRound } from 'lucide-react'
+import { CalendarDays, Download, LogOut, MapPin, UsersRound, XCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import Footer from '../components/Footer'
@@ -15,6 +15,7 @@ export default function MyBookings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [payingId, setPayingId] = useState('')
+  const [cancellingId, setCancellingId] = useState('')
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -39,6 +40,21 @@ export default function MyBookings() {
       setError(paymentError.message)
     } finally {
       setPayingId('')
+    }
+  }
+
+  const cancelBooking = async (booking) => {
+    const confirmed = window.confirm(`Cancel ${booking.id}? The ₹299 pre-booking amount is non-refundable. Any payment above ₹299 will be marked as a refund due for the owner to process.`)
+    if (!confirmed) return
+    setCancellingId(booking.id)
+    setError('')
+    try {
+      const result = await api.cancelBooking(booking.id, 'Cancelled by customer')
+      setBookings((current) => current.map((item) => item.id === booking.id ? result.booking : item))
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setCancellingId('')
     }
   }
 
@@ -71,6 +87,9 @@ export default function MyBookings() {
                   </button>
                 )}
                 {booking.amountPaid >= booking.depositAmount && booking.balanceAmount == null && <small className="quote-balance-note">The owner will set the final price before online balance payment.</small>}
+                {booking.amountPaid > 0 && <button className="booking-link-button" onClick={() => api.downloadReceipt(booking.id)}><Download /> Download receipt</button>}
+                {booking.status !== 'cancelled' && <button className="booking-link-button booking-link-button--danger" disabled={cancellingId === booking.id} onClick={() => cancelBooking(booking)}><XCircle /> {cancellingId === booking.id ? 'Cancelling…' : 'Cancel booking'}</button>}
+                {booking.status === 'cancelled' && <div className="cancellation-note"><b>Cancelled</b><span>{formatPrice(booking.cancellation?.depositRetained || 0)} deposit retained · {['pending', 'manual_required'].includes(booking.cancellation?.refundStatus) ? `${formatPrice(booking.cancellation.refundableAmount)} refund due` : booking.cancellation?.refundStatus === 'processed' ? 'refund processed' : 'no additional refund due'}</span></div>}
               </div>
             </article>
           ))}

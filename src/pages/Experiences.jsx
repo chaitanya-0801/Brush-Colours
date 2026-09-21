@@ -26,14 +26,15 @@ export default function Experiences() {
     const matching = activities.filter((activity) => {
       const categoryMatches = category === 'all' || activity.category === category
       const searchMatches = `${activity.title} ${activity.short}`.toLowerCase().includes(search.toLowerCase())
-      return categoryMatches && searchMatches
+      const cityMatches = city === 'All cities' || activity.locations?.includes(city)
+      return categoryMatches && searchMatches && cityMatches
     })
     return [...matching].sort((a, b) => {
       if (sort === 'low') return (a.price ?? Number.POSITIVE_INFINITY) - (b.price ?? Number.POSITIVE_INFINITY)
       if (sort === 'high') return (b.price ?? -1) - (a.price ?? -1)
       return b.rating - a.rating || b.reviews - a.reviews
     })
-  }, [category, search, sort])
+  }, [activities, category, city, search, sort])
 
   const updateCategory = (value) => {
     if (value === 'all') setSearchParams({})
