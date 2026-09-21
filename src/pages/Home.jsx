@@ -44,7 +44,7 @@ export default function Home() {
           </video>
           <div className="hero__veil" />
           <div className="shell hero__content">
-            <span className="hero__eyebrow">6 CITIES · EXPERIENCES AT YOUR VENUE</span>
+            <span className="hero__eyebrow">DELHI · KOTA · BOMBAY · PUNE · JAIPUR · GUJARAT</span>
             <h1>Make every gathering <em>unforgettable.</em></h1>
             <p>Curated activities for birthdays, weddings and creative weekends.</p>
             <div className="hero__actions">

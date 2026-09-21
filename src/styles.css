@@ -500,11 +500,14 @@ h2 em {
 
 .hero__eyebrow {
   display: inline-flex;
+  max-width: 100%;
   padding: 9px 16px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   font-size: 0.74rem;
+  line-height: 1.5;
   letter-spacing: 0.18em;
+  text-align: center;
 }
 
 .hero h1 {
@@ -834,6 +837,23 @@ h2 em {
   color: var(--muted);
   font-size: 0.91rem;
   line-height: 1.55;
+}
+
+.experience-card__price-note {
+  margin: 14px 0;
+  padding: 10px 12px;
+  color: var(--muted);
+  background: var(--paper);
+  border-radius: 9px;
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+.experience-card__price-note a {
+  color: var(--coral-dark);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .experience-card__meta {
@@ -1458,6 +1478,12 @@ h2 em {
   outline: 0;
   background: transparent;
   appearance: none;
+}
+
+.select-wrap select option,
+.filter-city select option {
+  color: #171717;
+  background: #ffffff;
 }
 
 .select-wrap svg {

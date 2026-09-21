@@ -54,6 +54,10 @@ export default function ExperienceCard({ activity, compact = false }) {
           </p>
         </div>
         {!compact && <p className="experience-card__description">{activity.short}</p>}
+        <p className="experience-card__price-note">
+          {activity.price == null ? 'Custom pricing is available.' : 'The displayed amount is the base price.'}{' '}
+          To negotiate, <a href="https://wa.me/916378788998?text=Hello%20Brush%26Colours%2C%20I%20would%20like%20to%20discuss%20the%20price%20of%20an%20experience." target="_blank" rel="noreferrer">contact the owner at +91 63787 88998</a>.
+        </p>
         <div className="experience-card__meta">
           <span><UsersRound size={15} />{activity.guests}</span>
           <span><Clock3 size={15} />{activity.duration}</span>
