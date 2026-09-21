@@ -46,6 +46,7 @@ export const api = {
   verifyPayment: (details) => request('/payments/verify', { method: 'POST', body: JSON.stringify(details) }),
   adminDashboard: () => request('/admin/dashboard'),
   adminBookings: (search = '') => request(`/admin/bookings?search=${encodeURIComponent(search)}`),
+  clearTrialBookings: (confirmation) => request('/admin/bookings', { method: 'DELETE', body: JSON.stringify({ confirmation }) }),
   adminGroupInquiries: (search = '') => request(`/admin/group-inquiries?search=${encodeURIComponent(search)}`),
   updateGroupInquiryStatus: (id, status) => request(`/admin/group-inquiries/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   getAdminActivities: () => request('/admin/activities'),

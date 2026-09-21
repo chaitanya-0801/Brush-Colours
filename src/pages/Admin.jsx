@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  CalendarDays, CircleDollarSign, Clock3, Edit3, IndianRupee, LayoutDashboard,
+  CalendarDays, CircleDollarSign, Clock3, Edit3, FolderOpen, IndianRupee, LayoutDashboard,
   LogOut, Menu, MessageSquareText, Moon, PackageOpen, Plus, Search, ShieldCheck, Sun, Trash2,
   UsersRound, WalletCards, X,
 } from 'lucide-react'
@@ -18,6 +18,12 @@ const menuItems = [
   ['Group Enquiries', MessageSquareText],
   ['Bookings', UsersRound],
   ['Monthly Revenue', WalletCards],
+]
+
+const activityCategories = [
+  { id: 'wedding', label: 'Wedding', description: 'Wedding stalls, live art and guest experiences' },
+  { id: 'workshop', label: 'Workshop', description: 'Bookable guided workshops and group activities' },
+  { id: 'birthday', label: 'Birthday', description: 'Creative parties and activities for children' },
 ]
 
 const statusLabel = (status) => ({ quote_requested: 'Quote requested', payment_pending: 'Payment pending', confirmed: 'Confirmed', cancelled: 'Cancelled' }[status] || status)
@@ -41,7 +47,10 @@ export default function Admin() {
   const [guestChanges, setGuestChanges] = useState({})
   const [settlingId, setSettlingId] = useState('')
   const [activityEditor, setActivityEditor] = useState(false)
+  const [activityCategory, setActivityCategory] = useState('wedding')
+  const [clearingBookings, setClearingBookings] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [securityOpen, setSecurityOpen] = useState(false)
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' })
   const [greeting, setGreeting] = useState(greetingForTime)
@@ -70,7 +79,8 @@ export default function Admin() {
     return () => window.clearInterval(timer)
   }, [])
 
-  const visibleActivities = useMemo(() => adminActivities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())), [adminActivities, query])
+  const visibleActivities = useMemo(() => adminActivities.filter((item) => item.category === activityCategory && item.title.toLowerCase().includes(query.toLowerCase())), [adminActivities, activityCategory, query])
+  const activityCounts = useMemo(() => Object.fromEntries(activityCategories.map(({ id }) => [id, adminActivities.filter((item) => item.category === id).length])), [adminActivities])
   const visibleBookings = useMemo(() => allBookings.filter((booking) => `${booking.id} ${booking.activityTitle} ${booking.customerName} ${booking.customerEmail} ${booking.city}`.toLowerCase().includes(query.toLowerCase())), [allBookings, query])
   const visibleGroupInquiries = useMemo(() => groupInquiries.filter((inquiry) => `${inquiry.reference} ${inquiry.fullName} ${inquiry.email} ${inquiry.city} ${inquiry.activityPreference}`.toLowerCase().includes(query.toLowerCase())), [groupInquiries, query])
 
@@ -151,6 +161,23 @@ export default function Admin() {
     }
   }
 
+  const clearTrialBookings = async () => {
+    const confirmation = window.prompt('This permanently removes every booking and its payment records. Type DELETE ALL TRIAL BOOKINGS to continue.')
+    if (confirmation !== 'DELETE ALL TRIAL BOOKINGS') return
+    setClearingBookings(true)
+    setError('')
+    setNotice('')
+    try {
+      const result = await api.clearTrialBookings(confirmation)
+      await loadDashboard()
+      setNotice(`${result.deletedBookings} trial booking${result.deletedBookings === 1 ? '' : 's'} removed.`)
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setClearingBookings(false)
+    }
+  }
+
   const changeGroupInquiryStatus = async (id, status) => {
     setError('')
     try {
@@ -205,6 +232,7 @@ export default function Admin() {
         <div className="admin-content" id="overview">
           <div className="admin-welcome"><div><span className="admin-mobile-section">{activeMenu}</span><h1>{greeting}, {user.name.split(' ')[0]}</h1><p>Live bookings, payments and revenue from your database.</p></div><button className="button button--outline" onClick={() => setSecurityOpen(true)}><ShieldCheck /> Security</button></div>
           {error && <div className="form-error admin-error">{error}</div>}
+          {notice && <div className="form-success admin-notice">{notice}</div>}
 
           <section className="admin-metrics">
             <article><i className="metric-icon metric-icon--coral"><CalendarDays /></i><div><span>Today’s bookings</span><strong>{metrics.todayBookings}</strong><small>{metrics.totalBookings} bookings in total</small></div></article>
@@ -220,9 +248,13 @@ export default function Admin() {
           </section>
 
           <section className="admin-panel pricing-panel" id="activities-&-pricing">
-            <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Add events, upload photos, edit descriptions, choose cities and create customer-facing time slots.</p></div><button className="button button--coral" onClick={() => setActivityEditor({ mode: 'create' })}><Plus /> Add event</button></div>
+            <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Open a category folder to add or edit its customer-facing events.</p></div><button className="button button--coral" onClick={() => setActivityEditor({ mode: 'create', category: activityCategory })}><Plus /> Add {activityCategory} event</button></div>
+            <div className="admin-category-folders" role="tablist" aria-label="Activity folders">
+              {activityCategories.map((category) => <button type="button" role="tab" aria-selected={activityCategory === category.id} className={activityCategory === category.id ? 'is-active' : ''} key={category.id} onClick={() => setActivityCategory(category.id)}><FolderOpen /><span><strong>{category.label}</strong><small>{category.description}</small></span><b>{activityCounts[category.id] || 0}</b></button>)}
+            </div>
             <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Price</th><th>Time slots</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><span className="admin-activity-thumb"><img src={activity.image} alt="" style={activityImageStyle(activity)} /></span><span><strong>{activity.title}</strong><small>{activity.short}</small></span></td><td className="capitalize">{activity.category}</td><td><strong>{formatPrice(activity.price)}</strong><small>{activity.priceUnit}</small></td><td><strong>{activity.timeSlots.length}</strong><small>{activity.locations.length} cities</small></td><td><span className={`status-pill ${activity.active ? 'status-pill--confirmed' : 'status-pill--cancelled'}`}><i /> {activity.active ? 'Active' : 'Hidden'}</span></td><td><div className="admin-row-actions"><button onClick={() => setActivityEditor({ mode: 'edit', activity })} title="Edit event"><Edit3 /></button><button className="danger" onClick={() => deleteActivity(activity)} title="Archive event"><Trash2 /></button></div></td></tr>)}</tbody></table></div>
-            <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} of {adminActivities.length} database events</span><span>Archived events keep their existing bookings.</span></div>
+            {!visibleActivities.length && <div className="admin-empty">No {activityCategory} events match this search.</div>}
+            <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} {activityCategory} events</span><span>{adminActivities.length} events across all three folders.</span></div>
           </section>
 
           <section className="admin-panel admin-group-enquiries" id="group-enquiries">
@@ -246,7 +278,7 @@ export default function Admin() {
           </section>
 
           <section className="admin-panel admin-bookings" id="bookings">
-            <div className="admin-panel__heading"><div><h2>All bookings</h2><p>Deposits, online balances and cash collections update revenue automatically.</p></div></div>
+            <div className="admin-panel__heading"><div><h2>All bookings</h2><p>Deposits, online balances and cash collections update revenue automatically.</p></div>{allBookings.length > 0 && <button className="admin-danger-button" disabled={clearingBookings} onClick={clearTrialBookings}><Trash2 /> {clearingBookings ? 'Clearing…' : 'Clear trial bookings'}</button>}</div>
             <div className="pricing-table-wrap">
               <table className="pricing-table bookings-table">
                 <thead><tr><th>Booking</th><th>Customer</th><th>Event</th><th>City</th><th>Payment</th><th>Status</th></tr></thead>
@@ -280,7 +312,7 @@ export default function Admin() {
       </main>
 
       {securityOpen && <div className="modal-backdrop" onMouseDown={() => setSecurityOpen(false)}><form className="checkout-modal security-modal" onSubmit={changePassword} onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={() => setSecurityOpen(false)}><X /></button><span className="kicker">Admin security</span><h2>Change your password</h2><p>You will be signed out after the password is changed.</p>{error && <div className="form-error">{error}</div>}<div className="form-grid"><label className="span-two">Current password<input required type="password" value={passwords.currentPassword} onChange={(event) => setPasswords({ ...passwords, currentPassword: event.target.value })} /></label><label className="span-two">New password<input required minLength="8" type="password" value={passwords.newPassword} onChange={(event) => setPasswords({ ...passwords, newPassword: event.target.value })} /></label></div><button className="button button--coral button--wide">Change password</button></form></div>}
-      {activityEditor && <AdminActivityEditor activity={activityEditor.mode === 'edit' ? activityEditor.activity : null} onClose={() => setActivityEditor(false)} onSaved={activitySaved} />}
+      {activityEditor && <AdminActivityEditor activity={activityEditor.mode === 'edit' ? activityEditor.activity : null} defaultCategory={activityEditor.category || activityCategory} onClose={() => setActivityEditor(false)} onSaved={activitySaved} />}
     </div>
   )
 }

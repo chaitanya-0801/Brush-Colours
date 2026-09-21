@@ -13,7 +13,7 @@ const emptyActivity = {
   active: true,
 }
 
-const makeForm = (activity) => activity ? {
+const makeForm = (activity, defaultCategory = 'birthday') => activity ? {
   ...activity,
   price: activity.price ?? '',
   imagePositionX: activity.imagePositionX ?? 50,
@@ -23,10 +23,10 @@ const makeForm = (activity) => activity ? {
   includes: [...(activity.includes || [])],
   timeSlots: (activity.timeSlots || []).map((slot) => ({ ...slot })),
   guestPricing: { ...emptyActivity.guestPricing, ...(activity.guestPricing || {}) },
-} : structuredClone(emptyActivity)
+} : { ...structuredClone(emptyActivity), category: defaultCategory }
 
-export default function AdminActivityEditor({ activity, onClose, onSaved }) {
-  const [form, setForm] = useState(() => makeForm(activity))
+export default function AdminActivityEditor({ activity, defaultCategory, onClose, onSaved }) {
+  const [form, setForm] = useState(() => makeForm(activity, defaultCategory))
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
