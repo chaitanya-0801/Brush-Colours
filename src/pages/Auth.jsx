@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { ArrowRight, Eye, EyeOff, ShieldCheck } from 'lucide-react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function Auth() {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { login, register } = useAuth()
+  const { login, register, loading, user } = useAuth()
   const isSignup = location.pathname === '/signup'
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
@@ -28,6 +28,9 @@ export default function Auth() {
       setSubmitting(false)
     }
   }
+
+  if (loading) return <div className="page-loader"><span /></div>
+  if (user) return <Navigate to={user.role === 'admin' ? '/admin' : '/profile'} replace />
 
   return (
     <main className="auth-page">

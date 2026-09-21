@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Bell, CalendarDays, ChevronDown, CircleDollarSign, Clock3, Edit3, IndianRupee,
-  LayoutDashboard, LogOut, Menu, PackageOpen, Plus, Search, ShieldCheck, Trash2,
+  CalendarDays, CircleDollarSign, Clock3, Edit3, IndianRupee, LayoutDashboard,
+  LogOut, Menu, Moon, PackageOpen, Plus, Search, ShieldCheck, Sun, Trash2,
   UsersRound, WalletCards, X,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,7 @@ import AdminActivityEditor from '../components/AdminActivityEditor'
 import { useActivities } from '../context/ActivityContext'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../data'
+import { useTheme } from '../context/ThemeContext'
 
 const menuItems = [
   ['Overview', LayoutDashboard],
@@ -19,6 +20,13 @@ const menuItems = [
 ]
 
 const statusLabel = (status) => ({ quote_requested: 'Quote requested', payment_pending: 'Payment pending', confirmed: 'Confirmed', cancelled: 'Cancelled' }[status] || status)
+
+const greetingForTime = () => {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
 
 export default function Admin() {
   const [activeMenu, setActiveMenu] = useState('Overview')
@@ -34,8 +42,10 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [securityOpen, setSecurityOpen] = useState(false)
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '' })
+  const [greeting, setGreeting] = useState(greetingForTime)
   const { refreshActivities } = useActivities()
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   const loadDashboard = async () => {
@@ -52,6 +62,10 @@ export default function Admin() {
   }
 
   useEffect(() => { loadDashboard() }, [])
+  useEffect(() => {
+    const timer = window.setInterval(() => setGreeting(greetingForTime()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const visibleActivities = useMemo(() => adminActivities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())), [adminActivities, query])
   const visibleBookings = useMemo(() => allBookings.filter((booking) => `${booking.id} ${booking.activityTitle} ${booking.customerName} ${booking.customerEmail} ${booking.city}`.toLowerCase().includes(query.toLowerCase())), [allBookings, query])
@@ -168,14 +182,14 @@ export default function Admin() {
         <header className="admin-topbar">
           <button className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu /></button>
           <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search bookings, customers, cities or activities..." /></label>
-          <button className="admin-bell" aria-label="Notifications"><Bell /><span /></button>
-          <button className="admin-profile" onClick={() => setSecurityOpen(true)} title="Account security">
-            <span className="admin-avatar">G</span><span><strong>{user.name}</strong><small>Owner</small></span><ChevronDown />
-          </button>
+          <button className="admin-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>{theme === 'dark' ? <Sun /> : <Moon />}</button>
+          <div className="admin-profile" title="Signed-in administrator">
+            <span className="admin-avatar">{user.name.trim().charAt(0).toUpperCase()}</span><span><strong>{user.name}</strong><small>Owner</small></span>
+          </div>
         </header>
 
         <div className="admin-content" id="overview">
-          <div className="admin-welcome"><div><span className="admin-mobile-section">{activeMenu}</span><h1>Good morning, {user.name.split(' ')[0]}</h1><p>Live bookings, payments and revenue from your database.</p></div><button className="button button--outline" onClick={() => setSecurityOpen(true)}><ShieldCheck /> Security</button></div>
+          <div className="admin-welcome"><div><span className="admin-mobile-section">{activeMenu}</span><h1>{greeting}, {user.name.split(' ')[0]}</h1><p>Live bookings, payments and revenue from your database.</p></div><button className="button button--outline" onClick={() => setSecurityOpen(true)}><ShieldCheck /> Security</button></div>
           {error && <div className="form-error admin-error">{error}</div>}
 
           <section className="admin-metrics">

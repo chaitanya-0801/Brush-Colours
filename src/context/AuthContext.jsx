@@ -28,6 +28,13 @@ export function AuthProvider({ children }) {
       await api.logout()
       setUser(null)
     },
+    async toggleFavorite(activityId) {
+      if (!user || user.role === 'admin') return null
+      const isSaved = user.favoriteActivityIds?.includes(activityId)
+      const result = isSaved ? await api.removeFavorite(activityId) : await api.saveFavorite(activityId)
+      setUser(result.user)
+      return result.user
+    },
   }), [user, loading])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

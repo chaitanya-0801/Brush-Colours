@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { CalendarDays, LogOut, Menu, UserRound, X } from 'lucide-react'
+import { CalendarDays, LogOut, Menu, Moon, Sun, UserRound, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 
 const links = [
   { label: 'Birthdays', to: '/experiences?category=birthday' },
@@ -14,6 +15,7 @@ export default function Header({ overlay = false }) {
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 36)
@@ -63,10 +65,13 @@ export default function Header({ overlay = false }) {
           </nav>
 
           <div className="header-actions">
-            <Link className={`icon-link ${darkText ? '' : 'icon-link--light'}`} to={user ? '/bookings' : '/login'} aria-label={user ? 'My bookings' : 'Sign in'}>
+            <button className={`icon-link theme-toggle ${darkText ? '' : 'icon-link--light'}`} onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+              {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+            </button>
+            <Link className={`icon-link ${darkText ? '' : 'icon-link--light'}`} to={user ? (user.role === 'admin' ? '/admin' : '/bookings') : '/login'} aria-label={user ? (user.role === 'admin' ? 'Admin dashboard' : 'My bookings') : 'Sign in'}>
               <CalendarDays size={19} />
             </Link>
-            <Link className={`icon-link ${darkText ? '' : 'icon-link--light'}`} to={user?.role === 'admin' ? '/admin' : '/login'} aria-label={user?.role === 'admin' ? 'Admin dashboard' : 'Account'}>
+            <Link className={`icon-link ${darkText ? '' : 'icon-link--light'}`} to={user ? '/profile' : '/login'} aria-label={user ? 'My profile' : 'Sign in'}>
               <UserRound size={19} />
             </Link>
             <Link className="button button--coral button--small header-cta" to="/experiences">
@@ -103,7 +108,7 @@ export default function Header({ overlay = false }) {
               </Link>
             ))}
             <a href="/#story" onClick={() => setMenuOpen(false)}>Our story</a>
-            {user ? <Link to={user.role === 'admin' ? '/admin' : '/bookings'}>{user.role === 'admin' ? 'Admin dashboard' : 'My bookings'}</Link> : <Link to="/login">Sign in</Link>}
+            {user ? <><Link to="/profile">My profile</Link><Link to={user.role === 'admin' ? '/admin' : '/bookings'}>{user.role === 'admin' ? 'Admin dashboard' : 'My bookings'}</Link></> : <Link to="/login">Sign in</Link>}
           </div>
           <div className="mobile-menu__footer">
             {user && <button className="mobile-menu__logout" onClick={logout}><LogOut /> Sign out</button>}

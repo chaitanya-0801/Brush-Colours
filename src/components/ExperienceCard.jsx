@@ -1,21 +1,46 @@
 import { Clock3, Heart, MapPin, Star, UsersRound } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { formatPrice } from '../data'
+import { useAuth } from '../context/AuthContext'
+import { useState } from 'react'
 
 export default function ExperienceCard({ activity, compact = false }) {
+  const { user, toggleFavorite } = useAuth()
+  const [saving, setSaving] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const saved = user?.favoriteActivityIds?.includes(activity.id)
+
+  const toggleSaved = async () => {
+    if (!user) {
+      navigate(`/login?next=${encodeURIComponent(`${location.pathname}${location.search}`)}`)
+      return
+    }
+    if (user.role === 'admin' || saving) return
+    setSaving(true)
+    try {
+      await toggleFavorite(activity.id)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <article className={`experience-card ${compact ? 'experience-card--compact' : ''}`}>
-      <Link className="experience-card__media" to={`/experience/${activity.id}`}>
-        <img src={activity.image} alt="" loading="lazy" />
+      <div className="experience-card__media">
+        <Link className="experience-card__image-link" to={`/experience/${activity.id}`} aria-label={`View ${activity.title}`}>
+          <img src={activity.image} alt={activity.title} loading="lazy" />
+        </Link>
         <span className="experience-card__badge">{activity.badge}</span>
-        <button
-          className="heart-button"
-          aria-label={`Save ${activity.title}`}
-          onClick={(event) => event.preventDefault()}
-        >
-          <Heart size={19} />
-        </button>
-      </Link>
+        {user?.role !== 'admin' && <button
+          type="button"
+          className={`heart-button ${saved ? 'is-saved' : ''}`}
+          aria-label={saved ? `Remove ${activity.title} from favourites` : `Save ${activity.title}`}
+          aria-pressed={Boolean(saved)}
+          disabled={saving}
+          onClick={toggleSaved}
+        ><Heart size={19} fill={saved ? 'currentColor' : 'none'} /></button>}
+      </div>
       <div className="experience-card__body">
         <div className="experience-card__title-row">
           <div>

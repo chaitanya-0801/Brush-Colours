@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react'
+import { ChevronDown, Search } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -76,9 +76,6 @@ export default function Experiences() {
               </label>
               <div className="filter-chips">
                 <label className="filter-city"><select value={city} onChange={(event) => setCity(event.target.value)}><option>All cities</option>{serviceCities.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown /></label>
-                <button>Date <ChevronDown /></button>
-                <button>Guests <ChevronDown /></button>
-                <button className="filter-chip--mobile"><SlidersHorizontal /> Filters</button>
               </div>
               <label className="sort-field">
                 <span>Sort by</span>

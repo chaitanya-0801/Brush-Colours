@@ -2,6 +2,11 @@ node_modules/
 dist/
 .npm-cache/
 .idea/
+backend/data/
+data/
+*.db
+*.sqlite
+*.sqlite3
 *.local
 
 # Local environment and secret files

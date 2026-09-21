@@ -5,6 +5,7 @@ import ExperienceDetail from './pages/ExperienceDetail'
 import Admin from './pages/Admin'
 import Auth from './pages/Auth'
 import MyBookings from './pages/MyBookings'
+import Profile from './pages/Profile'
 import ScrollToTop from './components/ScrollToTop'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/login" element={<Auth />} />
         <Route path="/signup" element={<Auth />} />
         <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute role="admin"><Admin /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
