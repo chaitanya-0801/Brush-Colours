@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, Search } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import ExperienceCard from '../components/ExperienceCard'
@@ -68,6 +68,11 @@ export default function Experiences() {
                 </button>
               ))}
             </div>
+
+            {category === 'workshop' && <div className="workshop-modes" aria-label="Workshop options">
+              <Link className="is-active" to="/experiences?category=workshop">Book a Workshop</Link>
+              <Link to="/group-events">Group Events</Link>
+            </div>}
 
             <div className="filter-bar">
               <label className="search-field">

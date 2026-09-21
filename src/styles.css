@@ -1117,6 +1117,68 @@ h2 em {
   background: var(--coral);
 }
 
+.workshop-modes {
+  width: max-content;
+  max-width: 100%;
+  margin: -5px 0 26px;
+  padding: 5px;
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: flex;
+  gap: 5px;
+}
+
+.workshop-modes a {
+  min-height: 48px;
+  padding: 0 25px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.workshop-modes a.is-active {
+  color: white;
+  background: var(--coral);
+}
+
+/* Group events */
+.group-events-page { min-height: 100vh; background: var(--paper); }
+.group-events-hero { position: relative; min-height: 590px; color: white; background: linear-gradient(90deg, rgba(12, 10, 8, .9), rgba(12, 10, 8, .28)), url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=2000&q=85') center/cover; display: flex; align-items: center; }
+.group-events-hero__content { padding-block: 95px; }
+.group-events-hero h1 { max-width: 920px; margin-bottom: 22px; font-size: clamp(3.3rem, 6.5vw, 7rem); line-height: .95; }
+.group-events-hero p { max-width: 630px; color: rgba(255,255,255,.78); font-size: 1.05rem; line-height: 1.7; }
+.workshop-modes--hero { margin: 34px 0 0; background: rgba(20,20,20,.3); border-color: rgba(255,255,255,.3); backdrop-filter: blur(12px); }
+.workshop-modes--hero a:not(.is-active) { color: white; }
+.group-enquiry-section { background: var(--paper); }
+.group-enquiry-layout { display: grid; grid-template-columns: minmax(280px, .7fr) minmax(560px, 1.3fr); align-items: start; gap: clamp(40px, 7vw, 110px); }
+.group-enquiry-intro { position: sticky; top: 110px; }
+.group-enquiry-intro h2 { margin-bottom: 18px; font-size: clamp(2.8rem, 4.5vw, 5rem); line-height: 1; }
+.group-enquiry-intro > p { color: var(--muted); line-height: 1.75; }
+.group-enquiry-intro ul { margin: 30px 0 0; padding: 0; display: grid; gap: 15px; list-style: none; }
+.group-enquiry-intro li { display: flex; align-items: center; gap: 11px; font-weight: 700; }
+.group-enquiry-intro li svg { width: 20px; color: var(--coral); }
+.group-enquiry-form { padding: 34px; background: var(--ivory); border: 1px solid var(--line); border-radius: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-shadow: var(--shadow); }
+.group-enquiry-form label { display: grid; gap: 8px; font-size: .8rem; font-weight: 800; }
+.group-enquiry-form label small { color: var(--muted); font-weight: 500; }
+.group-enquiry-form input,
+.group-enquiry-form select,
+.group-enquiry-form textarea { width: 100%; min-height: 52px; padding: 0 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 10px; outline: none; }
+.group-enquiry-form textarea { padding-block: 13px; resize: vertical; }
+.group-enquiry-form input:focus,
+.group-enquiry-form select:focus,
+.group-enquiry-form textarea:focus { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(236,135,104,.13); }
+.group-enquiry-form select option { color: #171717; background: white; }
+.group-enquiry-form .span-two { grid-column: 1 / -1; }
+.group-enquiry-success { max-width: 760px; margin: 0 auto; padding: clamp(35px, 7vw, 75px); background: var(--ivory); border: 1px solid var(--line); border-radius: 24px; text-align: center; box-shadow: var(--shadow); }
+.group-enquiry-success > svg { width: 62px; height: 62px; margin-bottom: 18px; color: var(--green); }
+.group-enquiry-success h2 { font-size: clamp(2.8rem, 5vw, 5rem); }
+.group-enquiry-success p { color: var(--muted); font-size: 1.05rem; line-height: 1.7; }
+.group-enquiry-success > div { margin-top: 25px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
 .filter-bar {
   margin: 18px 0 26px;
   display: grid;
@@ -2408,6 +2470,21 @@ h2 em {
 .pricing-panel { margin-bottom: 20px; }
 .pricing-panel__footer > .button { min-height: 42px; border-radius: 9px; font-size: .78rem; }
 .admin-bookings { margin-bottom: 20px; }
+.admin-group-enquiries { margin-bottom: 20px; }
+.admin-group-enquiries .admin-panel__heading > svg { width: 28px; color: var(--coral-dark); }
+.group-enquiries-table td { vertical-align: top; }
+.group-enquiries-table td:first-child,
+.group-enquiries-table td:nth-child(2),
+.group-enquiries-table td:nth-child(3),
+.group-enquiries-table td:nth-child(4),
+.group-enquiries-table td:nth-child(5) { display: grid; align-content: center; gap: 4px; }
+.group-enquiries-table td:first-child { min-height: 70px; }
+.group-enquiries-table td small { max-width: 260px; color: var(--muted); line-height: 1.45; }
+.group-enquiries-table td:nth-child(5) small { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.admin-contact-link { width: max-content; color: var(--coral-dark); font-size: .7rem; font-weight: 800; }
+.status-new { color: #9b6819; background: #fff0d7; }
+.status-contacted { color: #235f7e; background: #e4f1f7; }
+.status-closed { color: #62615e; background: #ececea; }
 .bookings-table { min-width: 1180px; }
 .bookings-table td:first-child { display: table-cell; }
 .bookings-table td strong, .bookings-table td small { display: block; }
@@ -2865,6 +2942,9 @@ h2 em {
   .profile-card { position: static; }
   .profile-stats { grid-template-columns: repeat(3, 1fr); }
 
+  .group-enquiry-layout { grid-template-columns: 1fr; }
+  .group-enquiry-intro { position: static; }
+
   .section {
     padding: 82px 0;
   }
@@ -3132,6 +3212,14 @@ h2 em {
   .profile-stats { grid-template-columns: 1fr; }
   .profile-stats > * { min-height: 82px; }
   .profile-saved .experience-grid--three { grid-template-columns: 1fr; }
+
+  .workshop-modes { width: 100%; }
+  .workshop-modes a { min-width: 0; padding-inline: 14px; flex: 1; }
+  .group-events-hero { min-height: 640px; }
+  .group-events-hero__content { padding-block: 80px; }
+  .group-events-hero h1 { font-size: clamp(3rem, 15vw, 4.6rem); }
+  .group-enquiry-form { padding: 20px; grid-template-columns: 1fr; }
+  .group-enquiry-form .span-two { grid-column: auto; }
 
   .hero {
     min-height: 760px;

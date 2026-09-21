@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   CalendarDays, CircleDollarSign, Clock3, Edit3, IndianRupee, LayoutDashboard,
-  LogOut, Menu, Moon, PackageOpen, Plus, Search, ShieldCheck, Sun, Trash2,
+  LogOut, Menu, MessageSquareText, Moon, PackageOpen, Plus, Search, ShieldCheck, Sun, Trash2,
   UsersRound, WalletCards, X,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext'
 const menuItems = [
   ['Overview', LayoutDashboard],
   ['Activities & Pricing', PackageOpen],
+  ['Group Enquiries', MessageSquareText],
   ['Bookings', UsersRound],
   ['Monthly Revenue', WalletCards],
 ]
@@ -35,6 +36,7 @@ export default function Admin() {
   const [dashboard, setDashboard] = useState(null)
   const [allBookings, setAllBookings] = useState([])
   const [adminActivities, setAdminActivities] = useState([])
+  const [groupInquiries, setGroupInquiries] = useState([])
   const [bookingAmounts, setBookingAmounts] = useState({})
   const [guestChanges, setGuestChanges] = useState({})
   const [settlingId, setSettlingId] = useState('')
@@ -50,10 +52,11 @@ export default function Admin() {
 
   const loadDashboard = async () => {
     try {
-      const [dashboardResult, bookingResult, activityResult] = await Promise.all([api.adminDashboard(), api.adminBookings(), api.getAdminActivities()])
+      const [dashboardResult, bookingResult, activityResult, inquiryResult] = await Promise.all([api.adminDashboard(), api.adminBookings(), api.getAdminActivities(), api.adminGroupInquiries()])
       setDashboard(dashboardResult)
       setAllBookings(bookingResult.bookings)
       setAdminActivities(activityResult.activities)
+      setGroupInquiries(inquiryResult.inquiries)
       setBookingAmounts(Object.fromEntries(bookingResult.bookings.map((booking) => [booking.id, booking.amount ?? ''])))
       setGuestChanges(Object.fromEntries(bookingResult.bookings.map((booking) => [booking.id, { guests: booking.guests, percentage: booking.guestAdjustment?.percentagePerGuest || 0 }])))
     } catch (requestError) {
@@ -69,6 +72,7 @@ export default function Admin() {
 
   const visibleActivities = useMemo(() => adminActivities.filter((item) => item.title.toLowerCase().includes(query.toLowerCase())), [adminActivities, query])
   const visibleBookings = useMemo(() => allBookings.filter((booking) => `${booking.id} ${booking.activityTitle} ${booking.customerName} ${booking.customerEmail} ${booking.city}`.toLowerCase().includes(query.toLowerCase())), [allBookings, query])
+  const visibleGroupInquiries = useMemo(() => groupInquiries.filter((inquiry) => `${inquiry.reference} ${inquiry.fullName} ${inquiry.email} ${inquiry.city} ${inquiry.activityPreference}`.toLowerCase().includes(query.toLowerCase())), [groupInquiries, query])
 
   const activitySaved = async () => {
     await Promise.all([loadDashboard(), refreshActivities()])
@@ -147,6 +151,16 @@ export default function Admin() {
     }
   }
 
+  const changeGroupInquiryStatus = async (id, status) => {
+    setError('')
+    try {
+      const result = await api.updateGroupInquiryStatus(id, status)
+      setGroupInquiries((current) => current.map((item) => item.id === id ? result.inquiry : item))
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
   const signOut = async () => {
     await logout()
     navigate('/login')
@@ -181,7 +195,7 @@ export default function Admin() {
       <main className="admin-main">
         <header className="admin-topbar">
           <button className="admin-menu" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu /></button>
-          <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search bookings, customers, cities or activities..." /></label>
+          <label className="admin-search"><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search bookings, group enquiries, customers or activities..." /></label>
           <button className="admin-theme" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>{theme === 'dark' ? <Sun /> : <Moon />}</button>
           <div className="admin-profile" title="Signed-in administrator">
             <span className="admin-avatar">{user.name.trim().charAt(0).toUpperCase()}</span><span><strong>{user.name}</strong><small>Owner</small></span>
@@ -209,6 +223,26 @@ export default function Admin() {
             <div className="admin-panel__heading"><div><h2>Activities & Pricing</h2><p>Add events, upload photos, edit descriptions, choose cities and create customer-facing time slots.</p></div><button className="button button--coral" onClick={() => setActivityEditor({ mode: 'create' })}><Plus /> Add event</button></div>
             <div className="pricing-table-wrap"><table className="pricing-table"><thead><tr><th>Activity</th><th>Category</th><th>Price</th><th>Time slots</th><th>Status</th><th>Actions</th></tr></thead><tbody>{visibleActivities.map((activity) => <tr key={activity.id}><td><img src={activity.image} alt="" /><span><strong>{activity.title}</strong><small>{activity.short}</small></span></td><td className="capitalize">{activity.category}</td><td><strong>{formatPrice(activity.price)}</strong><small>{activity.priceUnit}</small></td><td><strong>{activity.timeSlots.length}</strong><small>{activity.locations.length} cities</small></td><td><span className={`status-pill ${activity.active ? 'status-pill--confirmed' : 'status-pill--cancelled'}`}><i /> {activity.active ? 'Active' : 'Hidden'}</span></td><td><div className="admin-row-actions"><button onClick={() => setActivityEditor({ mode: 'edit', activity })} title="Edit event"><Edit3 /></button><button className="danger" onClick={() => deleteActivity(activity)} title="Archive event"><Trash2 /></button></div></td></tr>)}</tbody></table></div>
             <div className="pricing-panel__footer"><span>Showing {visibleActivities.length} of {adminActivities.length} database events</span><span>Archived events keep their existing bookings.</span></div>
+          </section>
+
+          <section className="admin-panel admin-group-enquiries" id="group-enquiries">
+            <div className="admin-panel__heading"><div><h2>Group enquiries</h2><p>Requests submitted through the Group Events form. Contact customers directly and update each enquiry as you handle it.</p></div><MessageSquareText /></div>
+            <div className="pricing-table-wrap">
+              <table className="pricing-table group-enquiries-table">
+                <thead><tr><th>Reference</th><th>Customer</th><th>Event</th><th>Group</th><th>Request</th><th>Status</th></tr></thead>
+                <tbody>{visibleGroupInquiries.map((inquiry) => (
+                  <tr key={inquiry.id}>
+                    <td><strong>{inquiry.reference}</strong><small>{new Date(inquiry.createdAt).toLocaleDateString('en-IN')}</small></td>
+                    <td><strong>{inquiry.fullName}</strong><small>{inquiry.email}</small><a className="admin-contact-link" href={`https://wa.me/${inquiry.whatsappNumber.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">{inquiry.whatsappNumber}</a></td>
+                    <td><strong>{inquiry.eventDate}</strong><small>{inquiry.eventType} · {inquiry.city}</small></td>
+                    <td><strong>{inquiry.participants} participants</strong><small>{inquiry.organizationName || 'Personal group'}</small></td>
+                    <td><strong>{inquiry.activityPreference}</strong><small title={inquiry.details}>{inquiry.details}</small></td>
+                    <td><select className={`booking-status-select status-${inquiry.status}`} value={inquiry.status} onChange={(event) => changeGroupInquiryStatus(inquiry.id, event.target.value)}><option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option></select></td>
+                  </tr>
+                ))}</tbody>
+              </table>
+              {!visibleGroupInquiries.length && <div className="admin-empty">No group enquiries match this search yet.</div>}
+            </div>
           </section>
 
           <section className="admin-panel admin-bookings" id="bookings">
