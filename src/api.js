@@ -1,7 +1,6 @@
-export const API_URL = import.meta.env.PROD
-  ? "/api"
-  : import.meta.env.VITE_API_URL ||
-    `${window.location.protocol}//${window.location.hostname}:4000/api`;
+export const API_URL =
+  import.meta.env.VITE_API_URL ||
+  `${window.location.protocol}//${window.location.hostname}:4000/api`;
 
 async function request(path, options = {}) {
   const isFormData = options.body instanceof FormData;
