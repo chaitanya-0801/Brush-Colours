@@ -57,7 +57,16 @@ export async function completePayment(order, bookingId, user, contact = '') {
         },
       },
     })
-    checkout.on('payment.failed', (response) => reject(new Error(response.error?.description || 'Payment failed. Please try again.')))
+    checkout.on('payment.failed', (response) => {
+  console.error('RAZORPAY PAYMENT FAILED:', response)
+
+  reject(
+    new Error(
+      response.error?.description ||
+        'Payment failed. Please try again.'
+    )
+  )
+})
     checkout.open()
   })
 }

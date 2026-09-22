@@ -10,6 +10,7 @@ import GroupEvents from './pages/GroupEvents'
 import LegalPage from './pages/LegalPage'
 import ScrollToTop from './components/ScrollToTop'
 import ProtectedRoute from './components/ProtectedRoute'
+import ForgotPassword from './pages/ForgetPassword'
 
 export default function App() {
   return (
@@ -25,6 +26,8 @@ export default function App() {
         <Route path="/cancellation-refund-policy" element={<LegalPage page="refunds" />} />
         <Route path="/service-delivery-policy" element={<LegalPage page="delivery" />} />
         <Route path="/login" element={<Auth />} />
+        <Route path="/forgotpassword" element={<ForgotPassword/>} />
+        <Route path="/forgotpassword/:token" element={<ForgotPassword/>} />
         <Route path="/signup" element={<Auth />} />
         <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
