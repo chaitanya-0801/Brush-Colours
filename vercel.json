@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-     "destination": "https://brushandcolours.app/api/:path*"
+     "destination": "https://backend.brushandcolours.app/api/:path*"
     },
     {
       "source": "/(.*)",
