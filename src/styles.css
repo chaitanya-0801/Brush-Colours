@@ -3409,10 +3409,46 @@ h2 em {
     gap: 40px;
   }
 
+ .footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.footer__bottom > span {
+  text-align: center;
+}
+
+.footer__bottom > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.footer__bottom a {
+  transition: color 180ms ease;
+}
+
+.footer__bottom a:hover {
+  color: var(--coral);
+}
+
+/* Tablet & mobile */
+@media (max-width: 768px) {
   .footer__bottom {
     flex-direction: column;
-    gap: 15px;
+    text-align: center;
+    gap: 14px;
   }
+
+  .footer__bottom > div {
+    flex-wrap: wrap;
+    gap: 10px 18px;
+  }
+}
 
   .catalogue-hero {
     padding: 68px 0 62px;
