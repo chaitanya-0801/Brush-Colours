@@ -5,19 +5,19 @@ export const categoryMeta = {
     label: 'Birthday',
     eyebrow: 'Big smiles, beautifully planned',
     description: 'Hosts, performers and hands-on activities that keep every child engaged.',
-    image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1400&q=85',
+    image: 'https://res.cloudinary.com/bwunptda/image/upload/v1790226818/1bandc.jpg',
   },
   wedding: {
     label: 'Wedding',
     eyebrow: 'Details guests remember',
     description: 'Live art, entertainment and thoughtful experiences for your celebration.',
-    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=85',
+    image:'https://res.cloudinary.com/bwunptda/image/upload/v1790226818/2bndc.jpg',
   },
   workshop: {
     label: 'Workshop',
     eyebrow: 'Make something together',
     description: 'Relaxed, beginner-friendly creative sessions for friends, families and teams.',
-    image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=1400&q=85',
+    image: 'https://res.cloudinary.com/bwunptda/image/upload/v1790226818/3bandc.jpg',
   },
 }
 
