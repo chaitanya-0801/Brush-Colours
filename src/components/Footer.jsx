@@ -38,7 +38,24 @@ export default function Footer() {
       </div>
       <div className="shell footer__bottom">
         <span>© 2026 Brush&amp;Colours</span>
-        <span>Designed and Developed by <a href="mailto:chirangsharma7495@gmail.com">Chirag Sharma</a> & <a href="https://iamchaitanya.vercel.app/">Chaitanya</a></span>
+        <span>
+  Designed and Developed by{" "}
+  <a
+    href="mailto:chirangsharma7495@gmail.com"
+    style={{ color: "blue" }}
+  >
+    Chirag Sharma
+  </a>{" "}
+  &{" "}
+  <a
+    href="https://iamchaitanya.vercel.app/"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ color: "blue" }}
+  >
+    Chaitanya
+  </a>
+</span>
         <div><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/cancellation-refund-policy">Refunds</Link><Link to="/service-delivery-policy">Service delivery</Link></div>
       </div>
     </footer>
